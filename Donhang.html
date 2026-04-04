@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Đơn hàng - Mang Yang Steel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --primary: #2563eb; --bg: #f8fafc; }
+        body { background-color: var(--bg); font-family: 'Inter', sans-serif; font-size: 13px; color: #334155; }
+        
+        .page-header { background: white; padding: 1rem 2rem; border-bottom: 1px solid #e2e8f0; }
+        .main-card { background: white; border-radius: 12px; margin: 1.5rem 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        
+        /* Table Styles */
+        .table th { background: #f8fafc; color: #475569; font-size: 11px; text-transform: uppercase; padding: 15px; }
+        .table td { vertical-align: middle; padding: 12px 15px; border-bottom: 1px solid #f1f5f9; }
+
+        /* Modal & Form */
+        .modal-xl { max-width: 95%; }
+        .form-label { font-weight: 600; font-size: 12px; color: #64748b; margin-bottom: 4px; }
+        .customer-info { background: #eff6ff; border-radius: 8px; padding: 15px; border: 1px solid #dbeafe; }
+        
+        .total-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; }
+        .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .total-final { font-size: 18px; font-weight: 800; color: #dc2626; border-top: 2px solid #e2e8f0; padding-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-sm btn-outline-secondary" onclick="history.back()"><i data-lucide="arrow-left" style="width:16px"></i></button>
+        <h5 class="mb-0 fw-bold text-dark">Quản lý Đơn bán hàng</h5>
+    </div>
+    <button class="btn btn-primary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalDonHang">
+        <i data-lucide="plus-circle" style="width:18px"></i> Tạo đơn hàng mới
+    </button>
+</div>
+
+<div class="main-card">
+    <div class="p-3 d-flex gap-2">
+        <div class="input-group input-group-sm" style="width: 300px;">
+            <span class="input-group-text bg-white"><i data-lucide="search" style="width:14px"></i></span>
+            <input type="text" class="form-control" placeholder="Tìm mã đơn, khách hàng...">
+        </div>
+        <select class="form-select form-select-sm" style="width: 150px;">
+            <option>Trạng thái đơn</option>
+            <option>Mới tạo</option>
+            <option>Đã thanh toán</option>
+        </select>
+    </div>
+
+    <table class="table mb-0">
+        <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Ngày tạo</th>
+                <th>Khách hàng</th>
+                <th>Người phụ trách</th>
+                <th class="text-end">Tổng tiền</th>
+                <th class="text-center">Thanh toán</th>
+                <th class="text-end">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="fw-bold text-primary">DH-040426-01</td>
+                <td>04/04/2026</td>
+                <td>Anh Nhựt - BDI01</td>
+                <td>Hệ thống</td>
+                <td class="text-end fw-bold text-danger">15,500,000</td>
+                <td class="text-center"><span class="badge bg-success-subtle text-success border border-success-subtle px-3">Đã xong</span></td>
+                <td class="text-end">
+                    <button class="btn btn-link btn-sm p-0 me-2 text-secondary"><i data-lucide="printer" style="width:16px"></i></button>
+                    <button class="btn btn-link btn-sm p-0 text-primary"><i data-lucide="edit" style="width:16px"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="modalDonHang" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-white border-bottom">
+                <h6 class="modal-title fw-bold d-flex align-items-center gap-2">
+                    <i data-lucide="shopping-bag" class="text-primary"></i> CHI TIẾT ĐƠN HÀNG
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-8">
+                        <div class="customer-info h-100">
+                            <label class="form-label text-primary uppercase small">Thông tin khách hàng</label>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <select class="form-select"><option>Chọn khách hàng...</option></select>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" placeholder="Số điện thoại...">
+                                </div>
+                                <div class="col-md-12">
+                                    <input type="text" class="form-control mt-2" placeholder="Địa chỉ giao hàng...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded h-100">
+                            <label class="form-label small">Thông tin đơn hàng</label>
+                            <div class="mb-2">
+                                <small class="text-muted">Ngày đơn:</small> 04/04/2026
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">Nhân viên:</small> Phan Đình Vi Nhựt
+                            </div>
+                            <select class="form-select form-select-sm mt-2">
+                                <option>Hình thức thanh toán</option>
+                                <option>Chuyển khoản</option>
+                                <option>Tiền mặt</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive border rounded mb-3">
+                    <table class="table table-sm mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="50">#</th>
+                                <th>Sản phẩm / Dịch vụ</th>
+                                <th width="100" class="text-center">Số lượng</th>
+                                <th width="150" class="text-end">Đơn giá</th>
+                                <th width="80" class="text-center">VAT (%)</th>
+                                <th width="100" class="text-center">CK (%)</th>
+                                <th width="150" class="text-end">Thành tiền</th>
+                                <th width="40"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center">1</td>
+                                <td><select class="form-select form-select-sm"><option>Thép tấm 5 ly</option></select></td>
+                                <td><input type="number" class="form-control form-control-sm text-center" value="5"></td>
+                                <td><input type="number" class="form-control form-control-sm text-end" value="1000000"></td>
+                                <td><input type="number" class="form-control form-control-sm text-center" value="10"></td>
+                                <td><input type="number" class="form-control form-control-sm text-center" value="0"></td>
+                                <td class="text-end fw-bold text-primary">5,500,000</td>
+                                <td><button class="btn btn-link btn-sm text-danger p-0"><i data-lucide="trash-2" style="width:14px"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <button class="btn btn-outline-primary btn-sm mb-4"><i data-lucide="plus" class="me-1" style="width:14px"></i> Thêm sản phẩm</button>
+
+                <div class="row justify-content-end">
+                    <div class="col-md-4">
+                        <div class="total-box">
+                            <div class="total-row"><span>Cộng tiền hàng:</span><span class="fw-bold">5,000,000</span></div>
+                            <div class="total-row"><span>Tiền thuế (VAT):</span><span class="fw-bold">500,000</span></div>
+                            <div class="total-row"><span>Chiết khấu thêm:</span><input type="number" class="form-control form-control-sm w-50 text-end" value="0"></div>
+                            <div class="total-row total-final mt-2"><span>TỔNG CỘNG:</span><span>5,500,000</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Hủy đơn</button>
+                <button type="button" class="btn btn-success px-4"><i data-lucide="check" class="me-1" style="width:16px"></i> Xác nhận & In đơn</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    lucide.createIcons();
+</script>
+</body>
+</html>
