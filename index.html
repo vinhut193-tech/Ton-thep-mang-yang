@@ -2,194 +2,193 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>QUẢN LÝ TỒN THÉP MANG YANG</title>
+    <title>HỆ THỐNG QUẢN TRỊ TÔN MANG YANG</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #1a73e8; --success: #28a745; --danger: #dc3545; --dark: #3c4043; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; }
+        :root { --main: #0061f2; --dark: #1f2d41; --text: #4a5568; --bg: #f2f5f9; --white: #ffffff; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
         .hidden { display: none !important; }
-        
-        /* Login Screen */
-        #login-screen { display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
-        
-        /* Dashboard & Header */
-        header { background: white; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
-        .container { padding: 20px; max-width: 1000px; margin: auto; }
-        
-        /* UI Elements */
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #dadce0; border-radius: 6px; box-sizing: border-box; }
-        button { cursor: pointer; border: none; border-radius: 6px; font-weight: 600; transition: 0.2s; }
-        .btn-main { background: var(--primary); color: white; padding: 12px; width: 100%; }
-        .btn-main:disabled { background: #ccc; }
-        
-        /* Menu Grid */
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
-        .menu-item { background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; text-align: center; cursor: pointer; transition: 0.3s; }
-        .menu-item:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: var(--primary); }
-        .menu-item i { font-size: 24px; display: block; margin-bottom: 10px; color: var(--primary); }
 
-        /* Table Style */
-        .table-container { background: white; padding: 20px; border-radius: 12px; overflow-x: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th, td { padding: 12px 15px; border-bottom: 1px solid #eee; text-align: left; }
-        th { background: #f1f3f4; color: var(--dark); text-transform: uppercase; font-size: 12px; }
-        tr:hover { background: #fbfbfb; }
-        .search-bar { margin-bottom: 15px; display: flex; gap: 10px; }
+        /* Login Layout */
+        #login-page { display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #0061f2 0%, #6900ad 100%); }
+        .login-card { background: var(--white); padding: 40px; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); width: 100%; max-width: 380px; }
+
+        /* App Layout */
+        header { background: var(--white); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .nav-brand { font-weight: 700; color: var(--main); font-size: 1.2rem; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+
+        /* Dashboard Cards */
+        .grid-menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .card-item { background: var(--white); padding: 25px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid #e3e6f0; }
+        .card-item:hover { transform: translateY(-5px); border-color: var(--main); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+        .card-item h3 { margin: 10px 0 5px 0; color: var(--dark); }
+
+        /* Table & Tools */
+        .data-box { background: var(--white); border-radius: 12px; padding: 20px; box-shadow: 0 2px 15px rgba(0,0,0,0.03); }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background: #f8f9fc; padding: 12px; text-align: left; font-size: 0.85rem; color: #5a5c69; border-bottom: 2px solid #e3e6f0; }
+        td { padding: 12px; border-bottom: 1px solid #e3e6f0; font-size: 0.9rem; }
+        
+        /* Buttons */
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #d1d3e2; border-radius: 8px; box-sizing: border-box; }
+        .btn-primary { background: var(--main); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; }
+        .btn-back { background: #6e707e; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-size: 0.8rem; }
+        .btn-edit { color: var(--main); margin-right: 10px; cursor: pointer; font-weight: bold; }
+        .btn-del { color: var(--danger); cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-box">
-            <h2 style="color:var(--primary); margin-top:0">Hệ Thống Quản Lý</h2>
-            <p style="color:#70757a; font-size:14px">Vui lòng đăng nhập để tiếp tục</p>
-            <input type="text" id="user" placeholder="Tên đăng nhập">
-            <input type="password" id="pass" placeholder="Mật khẩu">
-            <button class="btn-main" id="btn-login" onclick="handleLogin()">ĐĂNG NHẬP</button>
-        </div>
+<div id="login-page">
+    <div class="login-card">
+        <h2 style="margin-top:0; text-align:center">Hệ Thống Tôn</h2>
+        <input type="text" id="user" placeholder="Tên đăng nhập">
+        <input type="password" id="pass" placeholder="Mật khẩu">
+        <button class="btn-primary" onclick="doLogin()" id="login-btn">ĐĂNG NHẬP</button>
     </div>
+</div>
 
-    <div id="dashboard" class="hidden">
-        <header>
-            <b style="color:var(--primary)">HỆ THỐNG MANG YANG</b>
-            <div style="font-size: 14px;">
-                <span id="display-user"></span> | <a href="#" onclick="location.reload()" style="color:var(--danger); text-decoration:none">Thoát</a>
+<div id="app-page" class="hidden">
+    <header>
+        <div class="nav-brand">MANG YANG STEEL</div>
+        <div style="font-size: 0.9rem;">
+            Chào, <b id="user-name"></b> | <a href="#" onclick="location.reload()" style="color:red; text-decoration:none">Đăng xuất</a>
+        </div>
+    </header>
+
+    <div class="container" id="dashboard-view">
+        <h2 style="margin-bottom: 25px;">Bảng điều khiển</h2>
+        <div class="grid-menu" id="main-menu-grid">
             </div>
-        </header>
-        <div class="container">
-            <h3>Chức năng chính</h3>
-            <div class="menu-grid" id="menu-list">
-                </div>
-        </div>
     </div>
 
-    <div id="screen-TonKho" class="hidden container">
-        <div style="display:flex; justify-content: space-between; align-items: center;">
-            <h3>Dữ liệu Tồn Kho</h3>
-            <button onclick="showDashboard()" style="padding:8px 15px; background:#6c757d; color:white">← Quay lại</button>
+    <div class="container hidden" id="inventory-view">
+        <div style="display:flex; justify-content: space-between; margin-bottom: 20px;">
+            <h3>Chi Tiết Tồn Kho</h3>
+            <button onclick="showView('dashboard-view')" class="btn-back">← QUAY LẠI</button>
         </div>
-        <div class="table-container">
-            <div class="search-bar">
-                <input type="text" id="search-input" placeholder="Tìm tên sản phẩm hoặc mã..." onkeyup="filterTable()">
+        <div class="data-box">
+            <input type="text" id="search-inventory" placeholder="Tìm tên sản phẩm..." onkeyup="filterTable()">
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã SP</th>
+                            <th>Tên Sản Phẩm</th>
+                            <th>Onhand</th>
+                            <th>Available</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-table-body"></tbody>
+                </table>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Mã SP</th>
-                        <th>Tên Sản Phẩm</th>
-                        <th>Onhand</th>
-                        <th>Available</th>
-                        <th>Commit</th>
-                        <th>Đặt NCC</th>
-                        <th>Đang về</th>
-                    </tr>
-                </thead>
-                <tbody id="inventory-data">
-                    </tbody>
-            </table>
         </div>
     </div>
+</div>
 
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbw2niInya7Wz9kmDLDdL4Ip6eLkw33Rwdafv6c-fQoiTO2XV6X2ShxnakVPHz31XkMJzA/exec";
-        let currentUser = null;
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2niInya7Wz9kmDLDdL4Ip6eLkw33Rwdafv6c-fQoiTO2XV6X2ShxnakVPHz31XkMJzA/exec";
+let userAuth = null;
 
-        // Xử lý Đăng nhập
-        async function handleLogin() {
-            const u = document.getElementById('user').value;
-            const p = document.getElementById('pass').value;
-            const btn = document.getElementById('btn-login');
+async function doLogin() {
+    const u = document.getElementById('user').value;
+    const p = document.getElementById('pass').value;
+    const btn = document.getElementById('login-btn');
+    
+    btn.innerText = "Đang kiểm tra...";
+    btn.disabled = true;
 
-            if(!u || !p) return alert("Nhập đủ tài khoản/mật khẩu");
-            
-            btn.innerText = "Đang xác thực...";
-            btn.disabled = true;
+    try {
+        const res = await fetch(`${SCRIPT_URL}?action=login&u=${u}&p=${p}`);
+        const data = await res.json();
 
-            try {
-                const response = await fetch(`${API_URL}?action=login&u=${u}&p=${p}`);
-                const data = await response.json();
-
-                if(data.status === "success") {
-                    currentUser = data;
-                    showDashboard();
-                } else {
-                    alert(data.message);
-                    btn.innerText = "ĐĂNG NHẬP";
-                    btn.disabled = false;
-                }
-            } catch (e) {
-                alert("Lỗi kết nối máy chủ!");
-                btn.disabled = false;
-            }
+        if(data.status === "success") {
+            userAuth = data;
+            initApp();
+        } else {
+            alert(data.message);
+            btn.innerText = "ĐĂNG NHẬP";
+            btn.disabled = false;
         }
+    } catch(e) {
+        alert("Lỗi kết nối Server!");
+        btn.disabled = false;
+    }
+}
 
-        // Hiển thị Menu Dashboard
-        function showDashboard() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('screen-TonKho').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            document.getElementById('display-user').innerText = currentUser.name;
+function initApp() {
+    document.getElementById('login-page').classList.add('hidden');
+    document.getElementById('app-page').classList.remove('hidden');
+    document.getElementById('user-name').innerText = userAuth.name;
 
-            const menuList = document.getElementById('menu-list');
-            menuList.innerHTML = "";
-            const funcs = ["BanHang", "TonKho", "CongNo", "ThuChi", "User"];
+    const grid = document.getElementById('main-menu-grid');
+    grid.innerHTML = "";
+    
+    // Chỉ hiện menu nếu có quyền Read
+    userAuth.permissions.read.forEach(func => {
+        if(!func) return;
+        const card = document.createElement('div');
+        card.className = 'card-item';
+        card.innerHTML = `<h3>${func}</h3><p style="font-size:0.8rem; color:#888">Bấm để quản lý</p>`;
+        card.onclick = () => openModule(func);
+        grid.appendChild(card);
+    });
+}
 
-            funcs.forEach(f => {
-                if(currentUser.canRead.includes(f)) {
-                    const item = document.createElement('div');
-                    item.className = 'menu-item';
-                    item.innerHTML = `<b>${f}</b>`;
-                    item.onclick = () => openFunction(f);
-                    menuList.appendChild(item);
-                }
-            });
-        }
+function openModule(name) {
+    if(name === "TonKho") {
+        showView('inventory-view');
+        loadInventoryData();
+    } else {
+        alert("Chức năng " + name + " chưa sẵn sàng.");
+    }
+}
 
-        // Điều hướng chức năng
-        function openFunction(name) {
-            if(name === "TonKho") {
-                document.getElementById('dashboard').classList.add('hidden');
-                document.getElementById('screen-TonKho').classList.remove('hidden');
-                loadInventory();
-            } else {
-                alert("Chức năng " + name + " đang được xây dựng.");
-            }
-        }
+async function loadInventoryData() {
+    const tbody = document.getElementById('inventory-table-body');
+    tbody.innerHTML = "<tr><td colspan='5'>Đang tải...</td></tr>";
 
-        // Tải dữ liệu Tồn Kho
-        async function loadInventory() {
-            const tbody = document.getElementById('inventory-data');
-            tbody.innerHTML = "<tr><td colspan='7'>Đang tải dữ liệu...</td></tr>";
+    const res = await fetch(`${SCRIPT_URL}?action=getInventory`);
+    const data = await res.json();
+    
+    tbody.innerHTML = "";
+    data.forEach(item => {
+        // Kiểm tra quyền Edit/Delete cho module TonKho
+        let actions = "";
+        if(userAuth.permissions.edit.includes("TonKho")) actions += `<span class="btn-edit">Sửa</span>`;
+        if(userAuth.permissions.del.includes("TonKho")) actions += `<span class="btn-del" style="color:red">Xóa</span>`;
+        if(!actions) actions = "Chỉ xem";
 
-            const res = await fetch(`${API_URL}?action=getInventory`);
-            const data = await res.json();
+        tbody.innerHTML += `
+            <tr>
+                <td>${item.maSP}</td>
+                <td><b>${item.tenSP}</b></td>
+                <td>${item.onhand}</td>
+                <td style="color:green; font-weight:bold">${item.available}</td>
+                <td>${actions}</td>
+            </tr>
+        `;
+    });
+}
 
-            tbody.innerHTML = "";
-            data.forEach(item => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${item.maSP}</td>
-                        <td><b>${item.tenSP}</b></td>
-                        <td style="color:blue">${item.onhand}</td>
-                        <td style="color:green">${item.available}</td>
-                        <td style="color:red">${item.commit}</td>
-                        <td>${item.ncc}</td>
-                        <td>${item.shipping}</td>
-                    </tr>
-                `;
-            });
-        }
+function showView(viewId) {
+    ['dashboard-view', 'inventory-view'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+    });
+    document.getElementById(viewId).classList.remove('hidden');
+}
 
-        // Tìm kiếm nhanh trong bảng
-        function filterTable() {
-            const input = document.getElementById("search-input").value.toUpperCase();
-            const rows = document.getElementById("inventory-data").getElementsByTagName("tr");
-            for (let i = 0; i < rows.length; i++) {
-                const text = rows[i].innerText.toUpperCase();
-                rows[i].style.display = text.indexOf(input) > -1 ? "" : "none";
-            }
-        }
-    </script>
+function filterTable() {
+    const input = document.getElementById("search-inventory").value.toUpperCase();
+    const rows = document.getElementById("inventory-table-body").getElementsByTagName("tr");
+    for (let i = 0; i < rows.length; i++) {
+        const text = rows[i].innerText.toUpperCase();
+        rows[i].style.display = text.indexOf(input) > -1 ? "" : "none";
+    }
+}
+</script>
 </body>
 </html>
