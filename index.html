@@ -144,10 +144,22 @@ function renderDashboard() {
         `;
         
         card.onclick = () => {
-            const perms = btoa(JSON.stringify(userAuth.permissions)); 
-            const uName = encodeURIComponent(userAuth.name);
-            window.location.href = `${mod}.html?user=${uName}&auth=${perms}`;
-        };
+    // Tạo bảng đối chiếu để đảm bảo tên file luôn khớp với GitHub
+    const fileMapping = {
+        "BanHang": "BanHang.html",
+        "TonKho": "TonKho.html",
+        "CongNo": "CongNo.html",
+        "ThuChi": "ThuChi.html",
+        "User": "User.html"
+    };
+
+    const targetFile = fileMapping[mod] || (mod + ".html");
+    
+    const perms = btoa(JSON.stringify(userAuth.permissions)); 
+    const uName = encodeURIComponent(userAuth.name);
+    
+    window.location.href = `${targetFile}?user=${uName}&auth=${perms}`;
+    };
         
         grid.appendChild(card);
     });
