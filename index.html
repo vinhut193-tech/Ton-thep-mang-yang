@@ -9,9 +9,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root { --primary-bg: #f8fafd; --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); }
-        body { font-family: 'Inter', sans-serif; background-color: var(--primary-bg); color: #2d3436; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--primary-bg); color: #2d3436; margin: 0; }
         
-        #login-page { background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%); height: 100vh; display: flex; align-items: center; justify-content: center; }
+        #login-page { background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%); height: 100vh; display: flex; align-items: center; justify-content: center; position: fixed; width: 100%; top: 0; left: 0; z-index: 1000; }
         .login-card { background: white; padding: 2.5rem; border-radius: 1.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.2); width: 100%; max-width: 400px; text-align: center; }
 
         .sidebar { background: white; min-height: 100vh; border-right: 1px solid #edf2f7; width: 80px; position: fixed; display: flex; flex-direction: column; align-items: center; padding-top: 20px; z-index: 100; }
@@ -40,7 +40,8 @@
 
 <div id="login-page">
     <div class="login-card">
-        <h3 class="fw-bold mb-4">Chào mừng trở lại!</h3>
+        <h3 class="fw-bold mb-4">MANG YANG STEEL</h3>
+        <p class="text-muted mb-4">Vui lòng đăng nhập để tiếp tục</p>
         <input type="text" id="user" class="form-control form-control-lg mb-3" placeholder="Tên đăng nhập">
         <input type="password" id="pass" class="form-control form-control-lg mb-3" placeholder="Mật khẩu">
         <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="doLogin()" id="login-btn">Vào hệ thống</button>
@@ -51,22 +52,21 @@
     <div class="sidebar d-none d-md-flex">
         <div class="mb-5"><i data-lucide="layers" class="text-primary" style="width: 32px; height: 32px;"></i></div>
         <div class="mb-4" style="cursor:pointer" onclick="location.reload()"><i data-lucide="home"></i></div>
-        <div class="mb-4"><i data-lucide="settings"></i></div>
         <div class="mt-auto mb-4"><i data-lucide="log-out" class="text-danger" style="cursor:pointer" onclick="logout()"></i></div>
     </div>
 
     <div class="main-content">
         <div class="header-top">
             <div>
-                <h4 class="fw-bold mb-0 text-primary">MANG YANG STEEL</h4>
-                <p class="text-muted small mb-0">Quản trị hệ thống cửa hàng</p>
+                <h4 class="fw-bold mb-0 text-primary">DASHBOARD</h4>
+                <p class="text-muted small mb-0" id="current-date"></p>
             </div>
             <div class="d-flex align-items-center">
                 <div class="text-end me-3">
                     <div class="fw-bold" id="user-name"></div>
                     <div class="text-success small">Trực tuyến</div>
                 </div>
-                <img src="https://ui-avatars.com/api/?name=Admin&background=0D6EFD&color=fff" class="rounded-circle" width="45">
+                <img src="https://ui-avatars.com/api/?background=0D6EFD&color=fff&name=Admin" id="user-avatar" class="rounded-circle" width="45">
             </div>
         </div>
 
@@ -81,66 +81,82 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2niInya7Wz9kmDLDdL
 let userAuth = null;
 
 const moduleConfigs = {
-    "BanHang": { icon: "shopping-cart", color: "bg-blue", desc: "Bán hàng, khách hàng, cơ hội." },
-    "TonKho": { icon: "package", color: "bg-green", desc: "Tồn kho, xuất nhập kho, vận chuyển." },
-    "CongNo": { icon: "credit-card", color: "bg-orange", desc: "Công nợ khách hàng & NCC." },
-    "ThuChi": { icon: "wallet", color: "bg-purple", desc: "Kế toán, ngân sách, báo cáo." },
-    "User": { icon: "users", color: "bg-red", desc: "Cấu hình nhân sự & phân quyền." }
+    "BanHang": { icon: "shopping-cart", color: "bg-blue", desc: "Bán hàng & CRM." },
+    "TonKho": { icon: "package", color: "bg-green", desc: "Quản lý kho hàng." },
+    "CongNo": { icon: "credit-card", color: "bg-orange", desc: "Theo dõi công nợ." },
+    "ThuChi": { icon: "wallet", color: "bg-purple", desc: "Quản lý dòng tiền." },
+    "User": { icon: "users", color: "bg-red", desc: "Phân quyền nhân sự." }
 };
 
-// 1. TỰ ĐỘNG KIỂM TRA ĐĂNG NHẬP KHI TẢI TRANG
-window.onload = () => {
+// --- HÀM KIỂM TRA ĐĂNG NHẬP (QUAN TRỌNG NHẤT) ---
+function checkAuth() {
     const savedUser = localStorage.getItem('loggedUser');
     if (savedUser) {
         userAuth = JSON.parse(savedUser);
-        renderDashboard();
+        showAppPage();
     }
-};
+}
+
+// Gọi ngay khi file JS được tải
+checkAuth();
 
 async function doLogin() {
     const u = document.getElementById('user').value;
     const p = document.getElementById('pass').value;
     const btn = document.getElementById('login-btn');
     
-    btn.innerText = "Đang xác thực...";
+    if(!u || !p) return alert("Vui lòng nhập đủ thông tin!");
+    
+    btn.innerText = "Đang kết nối...";
     btn.disabled = true;
 
     try {
         const res = await fetch(`${SCRIPT_URL}?action=login&u=${u}&p=${p}`);
         const data = await res.json();
+        
         if(data.status === "success") {
             userAuth = data;
-            // LƯU TRẠNG THÁI VÀO TRÌNH DUYỆT
             localStorage.setItem('loggedUser', JSON.stringify(data)); 
-            renderDashboard();
+            showAppPage();
         } else {
             alert(data.message);
             btn.innerText = "Vào hệ thống";
             btn.disabled = false;
         }
     } catch(e) {
-        alert("Lỗi kết nối server!");
+        alert("Lỗi kết nối. Vui lòng kiểm tra internet!");
         btn.disabled = false;
+        btn.innerText = "Vào hệ thống";
     }
 }
 
-function logout() {
-    localStorage.removeItem('loggedUser'); // Xóa nhớ đăng nhập
-    location.reload();
-}
-
-function renderDashboard() {
+function showAppPage() {
     document.getElementById('login-page').classList.add('hidden');
     document.getElementById('app-page').classList.remove('hidden');
     document.getElementById('user-name').innerText = userAuth.name;
     document.getElementById('welcome-name').innerText = userAuth.name;
+    document.getElementById('current-date').innerText = new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    
+    renderDashboard();
+}
 
+function logout() {
+    if(confirm("Bạn muốn đăng xuất?")) {
+        localStorage.removeItem('loggedUser');
+        location.reload();
+    }
+}
+
+function renderDashboard() {
     const grid = document.getElementById('main-menu-grid');
     grid.innerHTML = "";
     
-    userAuth.permissions.read.forEach(mod => {
-        if(!mod) return;
-        const conf = moduleConfigs[mod] || { icon: "box", color: "bg-blue", desc: "Quản lý dữ liệu hệ thống." };
+    // Lấy quyền từ dữ liệu đã đăng nhập
+    const modules = userAuth.permissions.read;
+    
+    modules.forEach(mod => {
+        if(!mod || mod.trim() === "") return;
+        const conf = moduleConfigs[mod] || { icon: "box", color: "bg-blue", desc: "Chức năng hệ thống." };
         
         const card = document.createElement('div');
         card.className = "module-card";
@@ -153,7 +169,6 @@ function renderDashboard() {
         `;
         
         card.onclick = () => {
-            // ĐỐI CHIẾU FILE ĐỂ TRÁNH LỖI 404
             const fileMapping = {
                 "BanHang": "BanHang.html",
                 "TonKho": "TonKho.html",
