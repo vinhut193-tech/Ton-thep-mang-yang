@@ -1,59 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-    <title>Quản Lý Cửa Hàng</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>QUẢN LÝ TỒN THÉP MANG YANG</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: Arial; padding: 20px; }
+        :root { --primary: #1a73e8; --success: #28a745; --danger: #dc3545; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h2 { color: #333; margin-bottom: 20px; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; margin-top: 10px; font-size: 16px; }
+        .btn-login { background: var(--primary); color: white; }
+        .btn-login:hover { background: #1557b0; }
         .hidden { display: none; }
-        .menu-btn { padding: 15px; margin: 10px; width: 150px; cursor: pointer; }
-        #login-form { max-width: 300px; margin: auto; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .btn-func { background: #fff; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-func:hover { background: var(--primary); color: #fff; }
+        .user-info { text-align: left; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; }
+        .logout { background: var(--danger); color: white; margin-top: 20px; }
     </style>
 </head>
 <body>
 
+<div class="container">
     <div id="login-screen">
-        <h2>Đăng Nhập Hệ Thống</h2>
-        <input type="text" id="user" placeholder="Tên đăng nhập"><br><br>
-        <input type="password" id="pass" placeholder="Mật khẩu"><br><br>
-        <button onclick="login()">Vào hệ thống</button>
+        <h2>Hệ Thống Quản Lý</h2>
+        <input type="text" id="user" placeholder="Tên đăng nhập" autofocus>
+        <input type="password" id="pass" placeholder="Mật khẩu">
+        <button class="btn-login" onclick="login()" id="login-btn">ĐĂNG NHẬP</button>
     </div>
 
     <div id="main-menu" class="hidden">
-        <h2>Chào mừng, <span id="display-user"></span></h2>
-        <p>Quyền hạn: <b id="display-role"></b></p>
-        <hr>
-        <button class="menu-btn">Bán Hàng</button>
-        <button class="menu-btn">Tồn Kho</button>
-        <button class="menu-btn">Công Nợ</button>
-        <button class="menu-btn">Thu Chi</button>
-        <br><br>
-        <button onclick="location.reload()">Đăng xuất</button>
+        <div class="user-info">
+            Xin chào: <b id="u-name"></b><br>
+            Quyền: <span id="u-role" style="color:var(--primary)"></span>
+        </div>
+        <div class="menu-grid" id="function-list">
+            </div>
+        <button class="logout" onclick="location.reload()">Đăng xuất</button>
     </div>
+</div>
 
-    <script>
-        const SCRIPT_URL = "AKfycbw2niInya7Wz9kmDLDdL4Ip6eLkw33Rwdafv6c-fQoiTO2XV6X2ShxnakVPHz31XkMJzA";
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2niInya7Wz9kmDLDdL4Ip6eLkw33Rwdafv6c-fQoiTO2XV6X2ShxnakVPHz31XkMJzA/exec";
 
-        function login() {
-            const user = document.getElementById('user').value;
-            const pass = document.getElementById('pass').value;
+    function login() {
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
+        const btn = document.getElementById('login-btn');
 
-            fetch(SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify({username: user, password: pass})
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === "success") {
-                    document.getElementById('login-screen').classList.add('hidden');
-                    document.getElementById('main-menu').classList.remove('hidden');
-                    document.getElementById('display-user').innerText = user;
-                    document.getElementById('display-role').innerText = data.role;
-                } else {
-                    alert(data.message);
-                }
-            });
-        }
-    </script>
+        if(!u || !p) return alert("Vui lòng nhập đủ thông tin!");
+
+        btn.innerText = "Đang kiểm tra...";
+        btn.disabled = true;
+
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors", // Giải quyết vấn đề CORS cơ bản
+            body: JSON.stringify({username: u, password: p})
+        })
+        .then(() => {
+            // Lưu ý: no-cors không trả về data trực tiếp, 
+            // Nếu bạn gặp lỗi khi fetch, hãy chuyển Apps Script sang doGet để test hoặc 
+            // dùng ContentService đúng cách như hướng dẫn trước.
+            // Dưới đây là logic xử lý khi Apps Script trả về JSON thành công:
+            return fetch(SCRIPT_URL + "?u=" + u + "&p=" + p); 
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === "success") {
+                showMenu(data);
+            } else {
+                alert(data.message);
+                btn.innerText = "ĐĂNG NHẬP";
+                btn.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Lỗi kết nối API!");
+            btn.innerText = "ĐĂNG NHẬP";
+            btn.disabled = false;
+        });
+    }
+
+    function showMenu(data) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-menu').classList.remove('hidden');
+        document.getElementById('u-name').innerText = data.name;
+        document.getElementById('u-role').innerText = data.role;
+
+        const container = document.getElementById('function-list');
+        const allFunctions = ["BanHang", "TonKho", "CongNo", "ThuChi", "User"];
+        
+        allFunctions.forEach(func => {
+            if (data.canRead && data.canRead.includes(func)) {
+                let btn = document.createElement("button");
+                btn.className = "btn-func";
+                btn.innerText = func;
+                btn.onclick = () => alert("Bạn đang mở: " + func);
+                container.appendChild(btn);
+            }
+        });
+    }
+</script>
 </body>
 </html>
