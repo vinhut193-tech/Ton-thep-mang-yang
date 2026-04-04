@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>QUẢN LÝ TỒN KHO - MANG YANG</title>
+    <style>
+        /* Sử dụng lại CSS chuyên nghiệp của trang chủ */
+        body { font-family: 'Inter', sans-serif; background: #f2f5f9; margin: 0; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .data-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        .btn-edit { color: blue; cursor: pointer; font-weight: bold; margin-right: 10px; }
+        .btn-del { color: red; cursor: pointer; font-weight: bold; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2>DỮ LIỆU TỒN KHO</h2>
+    <div>
+        Chào, <b id="display-user"></b> | 
+        <button onclick="window.location.href='index.html'">← Về Trang Chủ</button>
+    </div>
+</div>
+
+<div class="data-card">
+    <input type="text" id="search" placeholder="Tìm kiếm sản phẩm..." onkeyup="filterTable()" style="width:100%; padding:10px; margin-bottom:15px; border-radius:5px; border:1px solid #ddd;">
+    <table>
+        <thead>
+            <tr>
+                <th>Mã SP</th>
+                <th>Tên Sản Phẩm</th>
+                <th>Onhand</th>
+                <th>Available</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody id="data-body">
+            </tbody>
+    </table>
+</div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbw2niInya7Wz9kmDLDdL4Ip6eLkw33Rwdafv6c-fQoiTO2XV6X2ShxnakVPHz31XkMJzA/exec";
+    
+    // 1. LẤY QUYỀN TỪ URL
+    const params = new URLSearchParams(window.location.search);
+    const userName = params.get('user');
+    const authData = JSON.parse(atob(params.get('auth'))); // Giải mã quyền
+
+    document.getElementById('display-user').innerText = userName;
+
+    // 2. TẢI DỮ LIỆU
+    async function loadData() {
+        const res = await fetch(`${API_URL}?action=getInventory`);
+        const data = await res.json();
+        const tbody = document.getElementById('data-body');
+        tbody.innerHTML = "";
+
+        data.forEach(item => {
+            // Kiểm tra quyền Edit/Delete cụ thể cho trang này
+            const canEdit = authData.edit.includes("TonKho");
+            const canDelete = authData.del.includes("TonKho");
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${item.maSP}</td>
+                    <td><b>${item.tenSP}</b></td>
+                    <td>${item.onhand}</td>
+                    <td>${item.available}</td>
+                    <td>
+                        ${canEdit ? '<span class="btn-edit" onclick="editRow(\''+item.maSP+'\')">Sửa</span>' : ''}
+                        ${canDelete ? '<span class="btn-del" onclick="deleteRow(\''+item.maSP+'\')">Xóa</span>' : ''}
+                        ${!canEdit && !canDelete ? '<small>Chỉ xem</small>' : ''}
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function editRow(id) { alert("Chức năng Sửa mã: " + id); }
+    function deleteRow(id) { if(confirm("Xóa mã " + id + "?")) alert("Đã xóa"); }
+    
+    loadData();
+</script>
+</body>
+</html>
