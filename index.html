@@ -19,7 +19,6 @@
         
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; background: white; padding: 1rem 2rem; border-radius: 1rem; box-shadow: var(--card-shadow); }
         
-        /* Giao diện chia nhóm Module */
         .category-title { font-size: 0.9rem; font-weight: 700; color: #0d6efd; text-transform: uppercase; border-left: 4px solid #0d6efd; padding-left: 10px; margin: 2rem 0 1rem 0; }
         .category-title.kinh-doanh { color: #198754; border-color: #198754; }
 
@@ -37,6 +36,8 @@
         .bg-orange { background: #fffaf0; color: #d97706; }
         .bg-purple { background: #f5f3ff; color: #7c3aed; }
         .bg-red { background: #fff5f5; color: #dc3545; }
+
+        #time-now { font-weight: 700; color: #0d6efd; background: #e7f0ff; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; }
 
         .hidden { display: none !important; }
     </style>
@@ -56,26 +57,31 @@
 <div id="app-page" class="hidden">
     <div class="sidebar d-none d-md-flex">
         <div class="mb-5"><i data-lucide="layers" class="text-primary" style="width: 32px; height: 32px;"></i></div>
-        <div class="mb-4" style="cursor:pointer" onclick="location.reload()"><i data-lucide="home"></i></div>
-        <div class="mt-auto mb-4"><i data-lucide="log-out" class="text-danger" style="cursor:pointer" onclick="logout()"></i></div>
+        <div class="mb-4" style="cursor:pointer" title="Trang chủ" onclick="location.reload()"><i data-lucide="home"></i></div>
+        <div class="mt-auto mb-4" title="Đăng xuất" style="cursor:pointer" onclick="logout()">
+            <i data-lucide="log-out" class="text-danger"></i>
+        </div>
     </div>
 
     <div class="main-content">
         <div class="header-top">
             <div>
                 <h4 class="fw-bold mb-0 text-primary">DASHBOARD</h4>
-                <p class="text-muted small mb-0" id="current-date"></p>
+                <div class="d-flex align-items-center gap-2 mt-1">
+                    <p class="text-muted small mb-0" id="current-date"></p>
+                    <span id="time-now">00:00:00</span>
+                </div>
             </div>
             <div class="d-flex align-items-center">
                 <div class="text-end me-3">
                     <div class="fw-bold" id="user-name"></div>
-                    <div class="text-success small">Trực tuyến</div>
+                    <div class="text-success small" style="cursor:pointer" onclick="logout()">Đăng xuất</div>
                 </div>
-                <img src="https://ui-avatars.com/api/?background=0D6EFD&color=fff&name=Admin" class="rounded-circle" width="45">
+                <img src="https://ui-avatars.com/api/?background=0D6EFD&color=fff&name=Admin" class="rounded-circle" width="45" style="cursor:pointer" onclick="logout()" title="Bấm để đăng xuất">
             </div>
         </div>
 
-        <h2 class="fw-bold mb-4">Chào buổi chiều, <span id="welcome-name"></span> 👋</h2>
+        <h2 class="fw-bold mb-4"><span id="greeting-text">Chào bạn</span>, <span id="welcome-name"></span> 👋</h2>
         
         <div id="group-kho-van" class="hidden">
             <div class="category-title">Kho Vận</div>
@@ -93,7 +99,6 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2niInya7Wz9kmDLDdL4Ip6eLkw33Rwdafv6c-fQoiTO2XV6X2ShxnakVPHz31XkMJzA/exec";
 let userAuth = null;
 
-// Cấu hình Module và nhóm
 const moduleConfigs = {
     "TonKho": { group: "kho", icon: "package", color: "bg-blue", desc: "Dữ liệu tồn kho & vị trí." },
     "PhieuKho": { group: "kho", icon: "clipboard-list", color: "bg-blue", desc: "Nhập xuất & điều chuyển." },
@@ -102,6 +107,23 @@ const moduleConfigs = {
     "ThuChi": { group: "kinhdoanh", icon: "wallet", color: "bg-purple", desc: "Dòng tiền & Chi phí." },
     "User": { group: "hethong", icon: "users", color: "bg-red", desc: "Nhân sự & Phân quyền." }
 };
+
+// Hàm cập nhật THỜI GIAN và LỜI CHÀO theo giờ thực tế
+function updateTime() {
+    const now = new Date();
+    const hours = now.getHours();
+    
+    // Cập nhật đồng hồ
+    document.getElementById('time-now').innerText = now.toLocaleTimeString('vi-VN');
+    
+    // Cập nhật lời chào
+    let greeting = "Chào buổi tối";
+    if (hours < 12) greeting = "Chào buổi sáng";
+    else if (hours < 18) greeting = "Chào buổi chiều";
+    
+    const greetingElement = document.getElementById('greeting-text');
+    if (greetingElement) greetingElement.innerText = greeting;
+}
 
 function checkAuth() {
     const savedUser = localStorage.getItem('loggedUser');
@@ -141,11 +163,17 @@ function showAppPage() {
     document.getElementById('user-name').innerText = userAuth.name;
     document.getElementById('welcome-name').innerText = userAuth.name;
     document.getElementById('current-date').innerText = new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    
+    updateTime();
+    setInterval(updateTime, 1000); // Chạy đồng hồ mỗi giây
     renderDashboard();
 }
 
 function logout() {
-    if(confirm("Bạn muốn đăng xuất?")) { localStorage.removeItem('loggedUser'); location.reload(); }
+    if(confirm("Bạn muốn đăng xuất khỏi hệ thống?")) {
+        localStorage.removeItem('loggedUser');
+        location.reload(); // Tải lại trang sẽ hiện lại màn hình Login
+    }
 }
 
 function renderDashboard() {
@@ -185,8 +213,7 @@ function renderDashboard() {
     });
 
     if(hasKho) document.getElementById('group-kho-van').classList.remove('hidden');
-    if(hasKinhDoanh) document.getElementById('group-group-kinh-doanh').classList.remove('hidden'); // Fix ID call
-    document.getElementById('group-kinh-doanh').classList.toggle('hidden', !hasKinhDoanh);
+    if(hasKinhDoanh) document.getElementById('group-kinh-doanh').classList.remove('hidden');
 
     lucide.createIcons();
 }
