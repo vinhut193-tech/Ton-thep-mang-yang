@@ -11,27 +11,22 @@
         :root { --primary-bg: #f8fafd; --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); }
         body { font-family: 'Inter', sans-serif; background-color: var(--primary-bg); color: #2d3436; }
         
-        /* Login Page */
         #login-page { background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%); height: 100vh; display: flex; align-items: center; justify-content: center; }
         .login-card { background: white; padding: 2.5rem; border-radius: 1.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.2); width: 100%; max-width: 400px; text-align: center; }
 
-        /* Dashboard Page */
-        .sidebar { background: white; min-height: 100vh; border-right: 1px solid #edf2f7; width: 80px; position: fixed; display: flex; flex-direction: column; align-items: center; padding-top: 20px; }
+        .sidebar { background: white; min-height: 100vh; border-right: 1px solid #edf2f7; width: 80px; position: fixed; display: flex; flex-direction: column; align-items: center; padding-top: 20px; z-index: 100; }
         .main-content { margin-left: 80px; padding: 2rem; }
         
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; background: white; padding: 1rem 2rem; border-radius: 1rem; box-shadow: var(--card-shadow); }
-        
         .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; }
         
-        /* Module Card Style */
-        .module-card { background: white; border: none; border-radius: 1.25rem; padding: 2rem; text-align: center; transition: all 0.3s ease; cursor: pointer; text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--card-shadow); }
+        .module-card { background: white; border: none; border-radius: 1.25rem; padding: 2rem; text-align: center; transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--card-shadow); border: 1px solid transparent; }
         .module-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); border: 1px solid #0d6efd; }
         
         .icon-box { width: 64px; height: 64px; border-radius: 1rem; display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
         .module-card h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
         .module-card p { font-size: 0.9rem; color: #636e72; margin: 0; }
 
-        /* Color Themes for Icons */
         .bg-blue { background: #e7f0ff; color: #0d6efd; }
         .bg-green { background: #e6fffa; color: #059669; }
         .bg-orange { background: #fffaf0; color: #d97706; }
@@ -55,9 +50,9 @@
 <div id="app-page" class="hidden">
     <div class="sidebar d-none d-md-flex">
         <div class="mb-5"><i data-lucide="layers" class="text-primary" style="width: 32px; height: 32px;"></i></div>
-        <div class="mb-4"><i data-lucide="home"></i></div>
+        <div class="mb-4" style="cursor:pointer" onclick="location.reload()"><i data-lucide="home"></i></div>
         <div class="mb-4"><i data-lucide="settings"></i></div>
-        <div class="mt-auto mb-4"><i data-lucide="log-out" class="text-danger" style="cursor:pointer" onclick="location.reload()"></i></div>
+        <div class="mt-auto mb-4"><i data-lucide="log-out" class="text-danger" style="cursor:pointer" onclick="logout()"></i></div>
     </div>
 
     <div class="main-content">
@@ -66,7 +61,7 @@
                 <h4 class="fw-bold mb-0 text-primary">MANG YANG STEEL</h4>
                 <p class="text-muted small mb-0">Quản trị hệ thống cửa hàng</p>
             </div>
-            <div class="d-flex align-items: center;">
+            <div class="d-flex align-items-center">
                 <div class="text-end me-3">
                     <div class="fw-bold" id="user-name"></div>
                     <div class="text-success small">Trực tuyến</div>
@@ -77,8 +72,7 @@
 
         <h2 class="fw-bold mb-4">Chào buổi chiều, <span id="welcome-name"></span> 👋</h2>
         
-        <div class="grid-container" id="main-menu-grid">
-            </div>
+        <div class="grid-container" id="main-menu-grid"></div>
     </div>
 </div>
 
@@ -86,13 +80,21 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2niInya7Wz9kmDLDdL4Ip6eLkw33Rwdafv6c-fQoiTO2XV6X2ShxnakVPHz31XkMJzA/exec";
 let userAuth = null;
 
-// Cấu hình Icon và Màu sắc cho từng Module (giống trong Sheet)
 const moduleConfigs = {
     "BanHang": { icon: "shopping-cart", color: "bg-blue", desc: "Bán hàng, khách hàng, cơ hội." },
     "TonKho": { icon: "package", color: "bg-green", desc: "Tồn kho, xuất nhập kho, vận chuyển." },
     "CongNo": { icon: "credit-card", color: "bg-orange", desc: "Công nợ khách hàng & NCC." },
     "ThuChi": { icon: "wallet", color: "bg-purple", desc: "Kế toán, ngân sách, báo cáo." },
     "User": { icon: "users", color: "bg-red", desc: "Cấu hình nhân sự & phân quyền." }
+};
+
+// 1. TỰ ĐỘNG KIỂM TRA ĐĂNG NHẬP KHI TẢI TRANG
+window.onload = () => {
+    const savedUser = localStorage.getItem('loggedUser');
+    if (savedUser) {
+        userAuth = JSON.parse(savedUser);
+        renderDashboard();
+    }
 };
 
 async function doLogin() {
@@ -108,6 +110,8 @@ async function doLogin() {
         const data = await res.json();
         if(data.status === "success") {
             userAuth = data;
+            // LƯU TRẠNG THÁI VÀO TRÌNH DUYỆT
+            localStorage.setItem('loggedUser', JSON.stringify(data)); 
             renderDashboard();
         } else {
             alert(data.message);
@@ -115,9 +119,14 @@ async function doLogin() {
             btn.disabled = false;
         }
     } catch(e) {
-        alert("Lỗi server!");
+        alert("Lỗi kết nối server!");
         btn.disabled = false;
     }
+}
+
+function logout() {
+    localStorage.removeItem('loggedUser'); // Xóa nhớ đăng nhập
+    location.reload();
 }
 
 function renderDashboard() {
@@ -144,27 +153,25 @@ function renderDashboard() {
         `;
         
         card.onclick = () => {
-    // Tạo bảng đối chiếu để đảm bảo tên file luôn khớp với GitHub
-    const fileMapping = {
-        "BanHang": "BanHang.html",
-        "TonKho": "TonKho.html",
-        "CongNo": "CongNo.html",
-        "ThuChi": "ThuChi.html",
-        "User": "User.html"
-    };
+            // ĐỐI CHIẾU FILE ĐỂ TRÁNH LỖI 404
+            const fileMapping = {
+                "BanHang": "BanHang.html",
+                "TonKho": "TonKho.html",
+                "CongNo": "CongNo.html",
+                "ThuChi": "ThuChi.html",
+                "User": "User.html"
+            };
 
-    const targetFile = fileMapping[mod] || (mod + ".html");
-    
-    const perms = btoa(JSON.stringify(userAuth.permissions)); 
-    const uName = encodeURIComponent(userAuth.name);
-    
-    window.location.href = `${targetFile}?user=${uName}&auth=${perms}`;
-    };
+            const targetFile = fileMapping[mod] || (mod + ".html");
+            const perms = btoa(JSON.stringify(userAuth.permissions)); 
+            const uName = encodeURIComponent(userAuth.name);
+            
+            window.location.href = `${targetFile}?user=${uName}&auth=${perms}`;
+        };
         
         grid.appendChild(card);
     });
     
-    // Khởi tạo lại Lucide Icons sau khi thêm động
     lucide.createIcons();
 }
 </script>
