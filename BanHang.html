@@ -10,41 +10,42 @@
         :root { --primary: #0d6efd; --bg: #f8fafd; }
         body { background-color: var(--bg); font-family: 'Inter', sans-serif; color: #334155; }
         
-        .header-section { background: white; padding: 1.5rem 2rem; border-bottom: 1px solid #e2e8f0; margin-bottom: 2rem; }
-        .category-title { font-size: 0.9rem; font-weight: 700; color: #0d6efd; text-transform: uppercase; border-left: 4px solid #0d6efd; padding-left: 10px; margin-bottom: 1.5rem; margin-top: 2rem; }
+        .header-section { background: white; padding: 1.5rem 2rem; border-bottom: 1px solid #e2e8f0; margin-bottom: 1rem; }
+        .category-title { font-size: 0.85rem; font-weight: 700; color: #0d6efd; text-transform: uppercase; border-left: 4px solid #0d6efd; padding-left: 10px; margin-bottom: 1.25rem; margin-top: 2rem; }
         
-        .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; }
+        .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
         
         /* Card Style */
         .sub-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; display: flex; align-items: flex-start; transition: all 0.2s ease; cursor: pointer; position: relative; text-decoration: none; color: inherit; }
         .sub-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #0d6efd; }
         
-        .icon-wrapper { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 1rem; flex-shrink: 0; }
+        .icon-wrapper { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 1rem; flex-shrink: 0; }
         .bg-blue { background: #eff6ff; color: #3b82f6; }
         .bg-teal { background: #f0fdfa; color: #0d9488; }
         .bg-orange { background: #fff7ed; color: #ea580c; }
         .bg-purple { background: #faf5ff; color: #9333ea; }
 
-        .card-content h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
-        .card-content p { font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.4; }
+        .card-content h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.15rem; }
+        .card-content p { font-size: 0.8rem; color: #64748b; margin: 0; line-height: 1.4; }
+        .card-content small { font-size: 0.7rem; color: #94a3b8; display: block; text-transform: lowercase; margin-top: 4px; }
         
         .star-icon { position: absolute; top: 1.25rem; right: 1.25rem; color: #cbd5e1; }
-        .btn-back { border-radius: 8px; font-weight: 600; }
+        .btn-back { border-radius: 8px; font-weight: 600; font-size: 13px; }
     </style>
 </head>
 <body>
 
 <div class="header-section d-flex justify-content-between align-items-center">
-    <div class="d-flex align-items: center;">
+    <div class="d-flex align-items-center">
         <a href="index.html" class="btn btn-outline-secondary btn-sm me-3 btn-back">
-            <i data-lucide="chevron-left" style="width:18px"></i> Quay lại
+            <i data-lucide="chevron-left" style="width:16px"></i> Quay lại
         </a>
-        <h4 class="fw-bold mb-0">Kinh doanh</h4>
+        <h5 class="fw-bold mb-0">Phân hệ Kinh doanh</h5>
     </div>
     <div class="d-flex gap-2">
-        <div class="input-group input-group-sm" style="width: 300px;">
-            <span class="input-group-text bg-white border-end-0"><i data-lucide="search" style="width:16px"></i></span>
-            <input type="text" class="form-control border-start-0" placeholder="Tìm module theo tên hoặc mô tả...">
+        <div class="input-group input-group-sm" style="width: 250px;">
+            <span class="input-group-text bg-white border-end-0"><i data-lucide="search" style="width:14px"></i></span>
+            <input type="text" class="form-control border-start-0" placeholder="Tìm kiếm nhanh...">
         </div>
     </div>
 </div>
@@ -53,104 +54,91 @@
     
     <div class="category-title">CRM & Khách hàng</div>
     <div class="module-grid">
-        <a href="#" class="sub-card">
-            <div class="icon-wrapper bg-blue"><i data-lucide="users"></i></div>
+        <a href="Khachhang.html" class="sub-card">
+            <div class="icon-wrapper bg-blue"><i data-lucide="users" style="width:20px"></i></div>
             <div class="card-content">
                 <h4>Danh sách khách hàng</h4>
-                <p>Hồ sơ khách hàng, liên hệ, lịch sử giao dịch.</p>
+                <p>Quản lý hồ sơ và lịch sử giao dịch khách hàng.</p>
+                <small>danh-sach-khach-hang</small>
             </div>
-            <i data-lucide="star" class="star-icon" style="width:16px"></i>
+            <i data-lucide="star" class="star-icon" style="width:14px"></i>
         </a>
-        <a href="#" class="sub-card">
-            <div class="icon-wrapper bg-teal"><i data-lucide="user-circle"></i></div>
+        <a href="Phieudexuat.html" class="sub-card">
+            <div class="icon-wrapper bg-teal"><i data-lucide="file-plus-2" style="width:20px"></i></div>
             <div class="card-content">
-                <h4>Người liên hệ</h4>
-                <p>Quản lý người liên hệ theo khách hàng, chức vụ, thông tin liên lạc.</p>
+                <h4>Đề xuất vật tư</h4>
+                <p>Lập phiếu yêu cầu vật tư cho dự án/văn phòng.</p>
+                <small>de-xuat-vat-tu</small>
             </div>
-            <i data-lucide="star" class="star-icon" style="width:16px"></i>
-        </a>
-        <a href="#" class="sub-card">
-            <div class="icon-wrapper bg-blue"><i data-lucide="map"></i></div>
-            <div class="card-content">
-                <h4>Bản đồ khách hàng</h4>
-                <p>Hiển thị khách hàng trên bản đồ, lên tuyến thăm khách hàng.</p>
-            </div>
-            <i data-lucide="star" class="star-icon" style="width:16px"></i>
-        </a>
-        <a href="#" class="sub-card">
-            <div class="icon-wrapper bg-teal"><i data-lucide="calendar-check"></i></div>
-            <div class="card-content">
-                <h4>Lịch chăm sóc</h4>
-                <p>Lên lịch gọi điện, gặp mặt, nhắc chăm sóc khách hàng định kỳ.</p>
-            </div>
-            <i data-lucide="star" class="star-icon" style="width:16px"></i>
+            <i data-lucide="star" class="star-icon" style="width:14px"></i>
         </a>
     </div>
 
-    <div class="category-title">Bán hàng & Đơn hàng</div>
+    <div class="category-title">Bán hàng & Sản phẩm</div>
     <div class="module-grid">
-        <a href="#" class="sub-card">
-            <div class="icon-wrapper bg-orange"><i data-lucide="target"></i></div>
+        <a href="Danhmucsanpham.html" class="sub-card">
+            <div class="icon-wrapper bg-orange"><i data-lucide="package" style="width:20px"></i></div>
             <div class="card-content">
-                <h4>Cơ hội bán hàng</h4>
-                <p>Pipeline: Lead → Báo giá → Thương thảo → Chốt đơn.</p>
+                <h4>Danh mục sản phẩm</h4>
+                <p>Quản lý mã hàng, đơn giá và quy cách thép.</p>
+                <small>danh-muc-san-pham</small>
             </div>
-            <i data-lucide="star" class="star-icon" style="width:16px"></i>
+            <i data-lucide="star" class="star-icon" style="width:14px"></i>
         </a>
-        <a href="#" class="sub-card">
-            <div class="icon-wrapper bg-purple"><i data-lucide="file-text"></i></div>
+        <a href="Baogia.html" class="sub-card">
+            <div class="icon-wrapper bg-purple"><i data-lucide="file-text" style="width:20px"></i></div>
             <div class="card-content">
-                <h4>Báo giá</h4>
-                <p>Lập báo giá, phê duyệt, chuyển sang đơn hàng hoặc hợp đồng.</p>
+                <h4>Báo giá khách hàng</h4>
+                <p>Tạo, phê duyệt và gửi báo giá cho đối tác.</p>
+                <small>bao-gia</small>
             </div>
-            <i data-lucide="star" class="star-icon" style="width:16px"></i>
+            <i data-lucide="star" class="star-icon" style="width:14px"></i>
         </a>
-        <a href="#" class="sub-card">
-            <div class="icon-wrapper bg-orange"><i data-lucide="shopping-cart"></i></div>
+        <a href="Donhang.html" class="sub-card">
+            <div class="icon-wrapper bg-orange"><i data-lucide="shopping-cart" style="width:20px"></i></div>
             <div class="card-content">
-                <h4>Đơn hàng</h4>
-                <p>Tạo, duyệt đơn hàng; liên kết báo giá, xuất kho.</p>
+                <h4>Đơn hàng bán</h4>
+                <p>Tạo đơn hàng, theo dõi giao hàng và xuất kho.</p>
+                <small>don-hang-ban</small>
             </div>
-            <i data-lucide="star" class="star-icon" style="width:16px"></i>
+            <i data-lucide="star" class="star-icon" style="width:14px"></i>
         </a>
-        <a href="#" class="sub-card">
-            <div class="icon-wrapper bg-purple"><i data-lucide="scroll"></i></div>
+        <a href="Hopdong.html" class="sub-card">
+            <div class="icon-wrapper bg-purple"><i data-lucide="scroll" style="width:20px"></i></div>
             <div class="card-content">
-                <h4>Hợp đồng</h4>
-                <p>Hợp đồng với khách hàng, điều khoản, theo dõi thanh toán.</p>
+                <h4>Hợp đồng kinh tế</h4>
+                <p>Theo dõi điều khoản, giá trị và phụ lục hợp đồng.</p>
+                <small>hop-dong-kinh-te</small>
             </div>
-            <i data-lucide="star" class="star-icon" style="width:16px"></i>
+            <i data-lucide="star" class="star-icon" style="width:14px"></i>
         </a>
     </div>
 
-    <div class="category-title">Báo cáo</div>
+    <div class="category-title">Thống kê & Báo cáo</div>
     <div class="module-grid">
-        <a href="#" class="sub-card">
-            <div class="icon-wrapper bg-blue"><i data-lucide="bar-chart-2"></i></div>
+        <a href="Baocaodoanhso.html" class="sub-card">
+            <div class="icon-wrapper bg-blue"><i data-lucide="bar-chart-2" style="width:20px"></i></div>
             <div class="card-content">
                 <h4>Báo cáo doanh số</h4>
-                <p>Doanh số theo thời gian, nhân viên, khách hàng, sản phẩm.</p>
+                <p>Theo dõi doanh thu theo nhân viên và khu vực.</p>
+                <small>bao-cao-doanh-so</small>
             </div>
-            <i data-lucide="star" class="star-icon" style="width:16px"></i>
         </a>
-        <a href="#" class="sub-card">
-            <div class="icon-wrapper bg-purple"><i data-lucide="pie-chart"></i></div>
+        <a href="Baocaocongno.html" class="sub-card">
+            <div class="icon-wrapper bg-purple"><i data-lucide="pie-chart" style="width:20px"></i></div>
             <div class="card-content">
                 <h4>Báo cáo công nợ</h4>
-                <p>Tổng công nợ, nợ quá hạn, tuổi nợ theo khách hàng.</p>
+                <p>Quản lý nợ phải thu và lịch sử thanh toán.</p>
+                <small>bao-cao-cong-no</small>
             </div>
-            <i data-lucide="star" class="star-icon" style="width:16px"></i>
         </a>
     </div>
 
 </div>
 
 <script>
-    // Khởi tạo icons
+    // Khởi tạo Lucide Icons
     lucide.createIcons();
-
-    // Bạn có thể thêm code xử lý phân quyền hiển thị tại đây 
-    // dựa trên dữ liệu 'auth' truyền từ index.html
 </script>
 </body>
 </html>
