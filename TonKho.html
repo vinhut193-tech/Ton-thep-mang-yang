@@ -2,88 +2,175 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>QUẢN LÝ TỒN KHO - MANG YANG</title>
+    <title>QUẢN LÝ TỒN KHO - MANG YANG STEEL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Sử dụng lại CSS chuyên nghiệp của trang chủ */
-        body { font-family: 'Inter', sans-serif; background: #f2f5f9; margin: 0; padding: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-        .data-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
-        .btn-edit { color: blue; cursor: pointer; font-weight: bold; margin-right: 10px; }
-        .btn-del { color: red; cursor: pointer; font-weight: bold; }
-        .hidden { display: none; }
+        :root { --main: #4e73df; --success: #1cc88a; --danger: #e74a3b; --bg: #f8f9fc; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #5a5c69; }
+        
+        /* Header & Navigation */
+        .header-box { background: white; padding: 15px 25px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); margin-bottom: 20px; border-left: 4px solid var(--main); }
+        .btn-back { background: #858796; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: 600; }
+
+        /* Filter Section */
+        .filter-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1); margin-bottom: 20px; }
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .filter-group label { display: block; font-size: 11px; font-weight: 800; color: var(--main); text-transform: uppercase; margin-bottom: 5px; }
+        .filter-group input { width: 100%; padding: 10px; border: 1px solid #d1d3e2; border-radius: 5px; outline: none; transition: 0.3s; }
+        .filter-group input:focus { border-color: var(--main); box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25); }
+
+        /* Table Section */
+        .table-container { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1); }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+        th { background: #f8f9fc; color: #4e73df; font-weight: 700; font-size: 12px; text-transform: uppercase; padding: 15px; border-bottom: 2px solid #e3e6f0; text-align: left; }
+        td { padding: 12px 15px; border-bottom: 1px solid #e3e6f0; font-size: 14px; }
+        tr:hover { background-color: #f1f4ff; }
+
+        /* Style cho số lượng */
+        .text-bold { font-weight: 700; }
+        .qty-onhand { color: #4e73df; }
+        .qty-available { color: #1cc88a; }
+        .qty-commit { color: #e74a3b; }
+        .badge-kho { background: #eaecf4; color: #5a5c69; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+
+        /* Buttons */
+        .btn-action { padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-edit { background: #d1d3e2; color: #2e59d9; margin-right: 5px; }
+        .btn-edit:hover { background: #2e59d9; color: white; }
+        .btn-del { background: #fadbd8; color: #e74a3b; }
+        .btn-del:hover { background: #e74a3b; color: white; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h2>DỮ LIỆU TỒN KHO</h2>
+<div class="header-box">
+    <h2 style="margin:0; font-size: 20px;">QUẢN LÝ TỒN KHO</h2>
     <div>
-        Chào, <b id="display-user"></b> | 
-        <button onclick="window.location.href='index.html'">← Về Trang Chủ</button>
+        Chào, <b id="display-user">...</b> | 
+        <a href="index.html" class="btn-back">← VỀ TRANG CHỦ</a>
     </div>
 </div>
 
-<div class="data-card">
-    <input type="text" id="search" placeholder="Tìm kiếm sản phẩm..." onkeyup="filterTable()" style="width:100%; padding:10px; margin-bottom:15px; border-radius:5px; border:1px solid #ddd;">
-    <table>
-        <thead>
-            <tr>
-                <th>Mã SP</th>
-                <th>Tên Sản Phẩm</th>
-                <th>Onhand</th>
-                <th>Available</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody id="data-body">
+<div class="filter-card">
+    <div class="filter-grid">
+        <div class="filter-group">
+            <label>Mã sản phẩm</label>
+            <input type="text" id="f-code" placeholder="Nhập mã..." onkeyup="doSearch()">
+        </div>
+        <div class="filter-group">
+            <label>Tên sản phẩm</label>
+            <input type="text" id="f-name" placeholder="Nhập tên SP..." onkeyup="doSearch()">
+        </div>
+        <div class="filter-group">
+            <label>Vị trí kho (Mã Kho)</label>
+            <input type="text" id="f-kho" placeholder="Nhập mã kho..." onkeyup="doSearch()">
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã SP</th>
+                    <th>Tên Sản Phẩm</th>
+                    <th>Vị Trí Kho</th>
+                    <th>Onhand</th>
+                    <th>Available</th>
+                    <th>Commit</th>
+                    <th>Đặt NCC</th>
+                    <th>Đang về</th>
+                    <th style="width: 110px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="inventory-data">
+                <tr><td colspan="9" style="text-align:center; padding: 50px;">Đang đồng bộ dữ liệu từ hệ thống...</td></tr>
             </tbody>
-    </table>
+        </table>
+    </div>
 </div>
 
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbw2niInya7Wz9kmDLDdL4Ip6eLkw33Rwdafv6c-fQoiTO2XV6X2ShxnakVPHz31XkMJzA/exec";
     
-    // 1. LẤY QUYỀN TỪ URL
+    // Đọc quyền từ URL
     const params = new URLSearchParams(window.location.search);
-    const userName = params.get('user');
-    const authData = JSON.parse(atob(params.get('auth'))); // Giải mã quyền
+    const uName = params.get('user') || "Guest";
+    const authRaw = params.get('auth');
+    let permissions = { edit: [], del: [] };
 
-    document.getElementById('display-user').innerText = userName;
+    if(authRaw) {
+        permissions = JSON.parse(atob(authRaw));
+    }
 
-    // 2. TẢI DỮ LIỆU
-    async function loadData() {
-        const res = await fetch(`${API_URL}?action=getInventory`);
-        const data = await res.json();
-        const tbody = document.getElementById('data-body');
+    document.getElementById('display-user').innerText = uName;
+
+    // Tải dữ liệu
+    async function fetchInventory() {
+        try {
+            const res = await fetch(`${API_URL}?action=getInventory`);
+            const data = await res.json();
+            renderTable(data);
+        } catch (e) {
+            document.getElementById('inventory-data').innerHTML = "<tr><td colspan='9' style='text-align:center; color:red'>Lỗi kết nối dữ liệu Google Sheets!</td></tr>";
+        }
+    }
+
+    function renderTable(list) {
+        const tbody = document.getElementById('inventory-data');
         tbody.innerHTML = "";
 
-        data.forEach(item => {
-            // Kiểm tra quyền Edit/Delete cụ thể cho trang này
-            const canEdit = authData.edit.includes("TonKho");
-            const canDelete = authData.del.includes("TonKho");
+        list.forEach(item => {
+            const canEdit = permissions.edit.includes("TonKho");
+            const canDel = permissions.del.includes("TonKho");
 
-            tbody.innerHTML += `
+            const row = `
                 <tr>
-                    <td>${item.maSP}</td>
-                    <td><b>${item.tenSP}</b></td>
-                    <td>${item.onhand}</td>
-                    <td>${item.available}</td>
+                    <td class="text-bold">${item.maSP}</td>
+                    <td>${item.tenSP}</td>
+                    <td><span class="badge-kho">${item.maKho || 'Chưa rõ'}</span></td>
+                    <td class="text-bold qty-onhand">${item.onhand || 0}</td>
+                    <td class="text-bold qty-available">${item.available || 0}</td>
+                    <td class="text-bold qty-commit">${item.commit || 0}</td>
+                    <td>${item.ncc || 0}</td>
+                    <td>${item.shipping || 0}</td>
                     <td>
-                        ${canEdit ? '<span class="btn-edit" onclick="editRow(\''+item.maSP+'\')">Sửa</span>' : ''}
-                        ${canDelete ? '<span class="btn-del" onclick="deleteRow(\''+item.maSP+'\')">Xóa</span>' : ''}
-                        ${!canEdit && !canDelete ? '<small>Chỉ xem</small>' : ''}
+                        ${canEdit ? `<button class="btn-action btn-edit" onclick="alert('Sửa: '+ '${item.maSP}')">Sửa</button>` : ''}
+                        ${canDel ? `<button class="btn-action btn-del" onclick="confirm('Xóa '+ '${item.maSP}' + '?')">Xóa</button>` : ''}
+                        ${!canEdit && !canDel ? '<small style="color:#ccc">Read-only</small>' : ''}
                     </td>
                 </tr>
             `;
+            tbody.innerHTML += row;
         });
     }
 
-    function editRow(id) { alert("Chức năng Sửa mã: " + id); }
-    function deleteRow(id) { if(confirm("Xóa mã " + id + "?")) alert("Đã xóa"); }
-    
-    loadData();
+    // Hàm Search đa cột
+    function doSearch() {
+        const code = document.getElementById('f-code').value.toUpperCase();
+        const name = document.getElementById('f-name').value.toUpperCase();
+        const kho = document.getElementById('f-kho').value.toUpperCase();
+        
+        const rows = document.getElementById('inventory-data').getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+            const txtCode = rows[i].cells[0].innerText.toUpperCase();
+            const txtName = rows[i].cells[1].innerText.toUpperCase();
+            const txtKho = rows[i].cells[2].innerText.toUpperCase();
+
+            if (txtCode.includes(code) && txtName.includes(name) && txtKho.includes(kho)) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
+
+    // Khởi chạy
+    fetchInventory();
 </script>
 </body>
 </html>
