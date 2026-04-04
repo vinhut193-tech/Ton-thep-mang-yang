@@ -1,10 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>HỆ THỐNG QUẢN TRỊ TÔN MANG YANG</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --main: #0061f2; --dark: #1f2d41; --text: #4a5568; --bg: #f2f5f9; --white: #ffffff; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+        .hidden { display: none !important; }
+
+        /* Login Layout */
+        #login-page { display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #0061f2 0%, #6900ad 100%); }
+        .login-card { background: var(--white); padding: 40px; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); width: 100%; max-width: 380px; text-align: center; }
+
+        /* App Layout */
+        header { background: var(--white); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .nav-brand { font-weight: 700; color: var(--main); font-size: 1.2rem; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+
+        /* Dashboard Cards */
+        .grid-menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .card-item { background: var(--white); padding: 25px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid #e3e6f0; }
+        .card-item:hover { transform: translateY(-5px); border-color: var(--main); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+        .card-item h3 { margin: 10px 0 5px 0; color: var(--dark); }
+
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #d1d3e2; border-radius: 8px; box-sizing: border-box; }
+        .btn-primary { background: var(--main); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div id="login-page">
+    <div class="login-card">
+        <h2 style="margin-top:0">Hệ Thống Quản Lý</h2>
+        <input type="text" id="user" placeholder="Tên đăng nhập">
+        <input type="password" id="pass" placeholder="Mật khẩu">
+        <button class="btn-primary" onclick="doLogin()" id="login-btn">ĐĂNG NHẬP</button>
+    </div>
+</div>
+
+<div id="app-page" class="hidden">
+    <header>
+        <div class="nav-brand">MANG YANG STEEL</div>
+        <div style="font-size: 0.9rem;">
+            Chào, <b id="user-name"></b> | <a href="#" onclick="location.reload()" style="color:red; text-decoration:none">Đăng xuất</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2 style="margin-bottom: 25px;">Bảng điều khiển</h2>
+        <div class="grid-menu" id="main-menu-grid">
+            </div>
+    </div>
+</div>
+
 <script>
-function openModule(name) {
-    // Tạo chuỗi mã hóa quyền để truyền sang trang sau
-    const perms = btoa(JSON.stringify(userAuth.permissions)); 
-    const userName = encodeURIComponent(userAuth.name);
+// LINK API CỦA BẠN
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2niInya7Wz9kmDLDdL4Ip6eLkw33Rwdafv6c-fQoiTO2XV6X2ShxnakVPHz31XkMJzA/exec";
+let userAuth = null;
+
+async function doLogin() {
+    const u = document.getElementById('user').value;
+    const p = document.getElementById('pass').value;
+    const btn = document.getElementById('login-btn');
     
-    // Chuyển hướng sang file tương ứng (ví dụ: TonKho.html?user=PhanNhut&auth=...)
-    window.location.href = `${name}.html?user=${userName}&auth=${perms}`;
+    btn.innerText = "Đang kiểm tra...";
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`${SCRIPT_URL}?action=login&u=${u}&p=${p}`);
+        const data = await res.json();
+
+        if(data.status === "success") {
+            userAuth = data;
+            renderDashboard();
+        } else {
+            alert(data.message);
+            btn.innerText = "ĐĂNG NHẬP";
+            btn.disabled = false;
+        }
+    } catch(e) {
+        alert("Lỗi kết nối máy chủ!");
+        btn.innerText = "ĐĂNG NHẬP";
+        btn.disabled = false;
+    }
+}
+
+function renderDashboard() {
+    document.getElementById('login-page').classList.add('hidden');
+    document.getElementById('app-page').classList.remove('hidden');
+    document.getElementById('user-name').innerText = userAuth.name;
+
+    const grid = document.getElementById('main-menu-grid');
+    grid.innerHTML = "";
+    
+    // Đọc danh sách quyền READ để tạo nút bấm
+    userAuth.permissions.read.forEach(moduleName => {
+        if(!moduleName) return;
+        const card = document.createElement('div');
+        card.className = 'card-item';
+        card.innerHTML = `<h3>${moduleName}</h3><p style="font-size:0.8rem; color:#888">Bấm để quản lý</p>`;
+        
+        // SỰ KIỆN QUAN TRỌNG: Điều hướng sang trang .html riêng biệt
+        card.onclick = () => {
+            const perms = btoa(JSON.stringify(userAuth.permissions)); 
+            const uName = encodeURIComponent(userAuth.name);
+            window.location.href = `${moduleName}.html?user=${uName}&auth=${perms}`;
+        };
+
+        grid.appendChild(card);
+    });
 }
 </script>
+</body>
+</html>
