@@ -1,4 +1,3 @@
-<script>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -8,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #0d6efd; --bg: #f0f2f5; }
         body { background-color: var(--bg); font-family: 'Inter', sans-serif; }
@@ -17,6 +17,8 @@
         .table-container { background: white; border-radius: 12px; padding: 1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .badge-low { background: #fff1f0; color: #ff4d4f; border: 1px solid #ffccc7; }
         .search-box { max-width: 400px; border-radius: 8px; }
+        .btn-excel { background-color: #198754; color: white; border: none; }
+        .btn-excel:hover { background-color: #157347; color: white; }
     </style>
 </head>
 <body>
@@ -50,8 +52,11 @@
     <div class="tab-content">
         <div class="tab-pane fade show active" id="product-content">
             <div class="table-container">
-                <div class="d-flex mb-3 gap-2">
+                <div class="d-flex mb-3 gap-2 justify-content-between">
                     <input type="text" id="searchProduct" class="form-control search-box" placeholder="Tìm kiếm sản phẩm..." onkeyup="filterProducts()">
+                    <button onclick="exportToExcel()" class="btn btn-excel btn-sm px-3 shadow-sm">
+                        <i data-lucide="download" class="me-1" style="width:16px"></i> Tải Excel tồn kho
+                    </button>
                 </div>
                 <div class="table-responsive">
                     <table class="table align-middle">
@@ -65,7 +70,9 @@
                                 <th>Đơn vị</th>
                             </tr>
                         </thead>
-                        <tbody id="productTableBody"></tbody>
+                        <tbody id="productTableBody">
+                            <tr><td colspan="6" class="text-center py-4 text-muted">Đang tải dữ liệu từ Supabase...</td></tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -89,38 +96,13 @@
 
         <div class="tab-pane fade" id="stat-content">
             <div class="row g-4 mb-4">
-                <div class="col-md-4">
-                    <div class="stat-card">
-                        <p class="text-muted mb-1">Tổng tồn</p>
-                        <h2 class="fw-bold" id="totalQty">0</h2>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="stat-card">
-                        <p class="text-muted mb-1">Số kho</p>
-                        <h2 class="fw-bold" id="totalLoc">0</h2>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="stat-card">
-                        <p class="text-muted mb-1">Mặt hàng có tồn</p>
-                        <h2 class="fw-bold" id="totalItems">0</h2>
-                    </div>
-                </div>
+                <div class="col-md-4"><div class="stat-card"><p class="text-muted mb-1">Tổng tồn</p><h2 class="fw-bold" id="totalQty">0</h2></div></div>
+                <div class="col-md-4"><div class="stat-card"><p class="text-muted mb-1">Số kho</p><h2 class="fw-bold" id="totalLoc">0</h2></div></div>
+                <div class="col-md-4"><div class="stat-card"><p class="text-muted mb-1">Mặt hàng có tồn</p><h2 class="fw-bold" id="totalItems">0</h2></div></div>
             </div>
             <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="stat-card">
-                        <h6 class="fw-bold mb-4">Tồn theo kho</h6>
-                        <canvas id="chartLoc"></canvas>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="stat-card">
-                        <h6 class="fw-bold mb-4">Top mặt hàng tồn nhiều nhất</h6>
-                        <canvas id="chartTopItems"></canvas>
-                    </div>
-                </div>
+                <div class="col-md-6"><div class="stat-card"><h6 class="fw-bold mb-4">Tồn theo kho</h6><canvas id="chartLoc"></canvas></div></div>
+                <div class="col-md-6"><div class="stat-card"><h6 class="fw-bold mb-4">Top mặt hàng tồn nhiều nhất</h6><canvas id="chartTopItems"></canvas></div></div>
             </div>
         </div>
     </div>
@@ -128,39 +110,27 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // --- KẾT NỐI SUPABASE (Giữ nguyên giao diện cũ của bạn) ---
     const SUPABASE_URL = "https://rlttyoforullfzlyeawa.supabase.co"; 
     const SUPABASE_KEY = "sb_publishable_Poa0upMxgh2GM0JkS17Bkg_XhchIrrb"; 
-
     let rawData = [];
 
     async function loadData() {
         try {
-            // Dùng dấu + để cộng chuỗi cho chắc chắn không lỗi dấu nháy
-            const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=*", {
-                headers: {
-                    "apikey": SUPABASE_KEY,
-                    "Authorization": "Bearer " + SUPABASE_KEY
-                }
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*`, {
+                headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
             });
-            
             const data = await response.json();
-            
-            // Chuyển đổi dữ liệu Supabase sang định dạng của giao diện bạn
             rawData = data.map(item => ({
                 maSP: item.sku,
                 tenSP: item.name,
-                maKho: item.warehouse_id,
+                maKho: item.warehouse_id || 'BDI01',
                 onhand: item.stock || 0,
                 limit: item.stock_limit || 5,
                 unit: item.unit || 'Cái'
             }));
-
             renderAll();
             lucide.createIcons();
-        } catch (e) { 
-            console.error("Lỗi kết nối:", e);
-        }
+        } catch (e) { console.error("Lỗi:", e); }
     }
 
     function renderAll() {
@@ -174,9 +144,9 @@
             <tr>
                 <td><span class="badge border text-dark bg-light">${item.maSP}</span></td>
                 <td class="fw-semibold">${item.tenSP}</td>
-                <td>${item.maKho || '---'}</td>
-                <td class="fw-bold">${item.onhand}</td>
-                <td>${item.onhand <= item.limit ? '<span class="badge badge-low">Dưới định mức</span>' : '---'}</td>
+                <td>${item.maKho}</td>
+                <td class="fw-bold text-primary">${item.onhand}</td>
+                <td>${item.onhand < item.limit ? '<span class="badge badge-low">Dưới định mức</span>' : '---'}</td>
                 <td>${item.unit}</td>
             </tr>
         `).join('');
@@ -186,34 +156,29 @@
     function renderLocationTable() {
         const groups = {};
         rawData.forEach(item => {
-            const k = item.maKho || "Kho khác";
+            const k = item.maKho;
             if(!groups[k]) groups[k] = { qty: 0, items: 0 };
             groups[k].qty += Number(item.onhand);
             groups[k].items += 1;
         });
-
         const html = Object.keys(groups).map(k => `
             <tr>
                 <td><span class="badge border text-dark bg-light">${k}</span></td>
-                <td class="fw-semibold">${k === 'MANGYANG01' ? 'Kho Mang Yang' : 'Kho trung tâm'}</td>
+                <td class="fw-semibold">${k === 'BDI01' ? 'Kho Bình Định' : 'Kho trung tâm'}</td>
                 <td class="text-end">${groups[k].items}</td>
-                <td class="text-end fw-bold">${groups[k].qty}</td>
+                <td class="text-end fw-bold text-primary">${groups[k].qty}</td>
             </tr>
         `).join('');
         document.getElementById('locationTableBody').innerHTML = html;
     }
 
     function renderStats() {
-        // Clear charts
         ['chartLoc', 'chartTopItems'].forEach(id => {
-            let chartStatus = Chart.getChart(id);
-            if (chartStatus) chartStatus.destroy();
+            let ch = Chart.getChart(id); if (ch) ch.destroy();
         });
-
         const totalQty = rawData.reduce((sum, item) => sum + Number(item.onhand), 0);
         document.getElementById('totalQty').innerText = totalQty.toLocaleString();
         document.getElementById('totalItems').innerText = rawData.length;
-        
         const locs = [...new Set(rawData.map(i => i.maKho))];
         document.getElementById('totalLoc').innerText = locs.length;
 
@@ -231,7 +196,7 @@
             type: 'bar',
             data: {
                 labels: top5.map(i => i.maSP),
-                datasets: [{ label: 'Tồn kho', data: top5.map(i => i.onhand), backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'] }]
+                datasets: [{ label: 'Tồn kho', data: top5.map(i => i.onhand), backgroundColor: '#6366f1' }]
             }
         });
     }
@@ -239,13 +204,20 @@
     function filterProducts() {
         const val = document.getElementById('searchProduct').value.toLowerCase();
         const rows = document.getElementById('productTableBody').getElementsByTagName('tr');
-        for (let r of rows) {
-            r.style.display = r.innerText.toLowerCase().includes(val) ? "" : "none";
-        }
+        for (let r of rows) { r.style.display = r.innerText.toLowerCase().includes(val) ? "" : "none"; }
     }
 
-    loadData();
+    function exportToExcel() {
+        if(rawData.length === 0) return;
+        const worksheet = XLSX.utils.json_to_sheet(rawData.map(i => ({
+            "Mã SP": i.maSP, "Tên Sản Phẩm": i.tenSP, "Mã Kho": i.maKho, "Số Lượng": i.onhand, "Đơn Vị": i.unit
+        })));
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "TonKho");
+        XLSX.writeFile(workbook, "TonKho_MangYang.xlsx");
+    }
+
+    setTimeout(loadData, 500);
 </script>
 </body>
 </html>
-<script>
