@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Danh mục & Đơn vị - Mang Yang Steel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --bg-body: #f4f7fa; }
+        body { background-color: var(--bg-body); font-family: 'Inter', sans-serif; font-size: 14px; }
+        .page-header { background: white; padding: 1rem 2rem; border-bottom: 1px solid #e2e8f0; margin-bottom: 1.5rem; }
+        .main-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 2rem; }
+        .table th { font-weight: 600; color: #475569; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        .nav-tabs .nav-link { border: none; color: #64748b; font-weight: 500; }
+        .nav-tabs .nav-link.active { color: #0d6efd; border-bottom: 2px solid #0d6efd; }
+    </style>
+</head>
+<body>
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h5 class="fw-bold text-primary mb-0">Thiết lập Hệ thống</h5>
+        <small class="text-muted">Quản lý Nhóm hàng và Đơn vị tính</small>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm" onclick="history.back()">
+        <i data-lucide="arrow-left" style="width:16px"></i> Quay lại
+    </button>
+</div>
+
+<div class="container-fluid px-4">
+    <div class="row">
+        <div class="col-md-7">
+            <div class="main-card">
+                <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                    <i data-lucide="layers" class="text-primary"></i> Nhóm hàng hóa
+                </h6>
+                
+                <div class="row g-2 mb-4 bg-light p-3 rounded">
+                    <div class="col-8">
+                        <input type="text" id="newCatName" class="form-control form-control-sm" placeholder="Tên nhóm (VD: Nệm, Thép...)">
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-primary btn-sm w-100" onclick="addItem('categories', 'newCatName')">Thêm Nhóm</button>
+                    </div>
+                </div>
+
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tên nhóm hàng</th>
+                            <th width="80" class="text-end">Xóa</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cat-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="main-card">
+                <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                    <i data-lucide="box" class="text-success"></i> Đơn vị tính
+                </h6>
+
+                <div class="row g-2 mb-4 bg-light p-3 rounded">
+                    <div class="col-8">
+                        <input type="text" id="newUnitName" class="form-control form-control-sm" placeholder="Cây, Cái, Kg, Bịch...">
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-success btn-sm w-100" onclick="addItem('units', 'newUnitName')">Thêm ĐV</button>
+                    </div>
+                </div>
+
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Đơn vị</th>
+                            <th width="80" class="text-end">Xóa</th>
+                        </tr>
+                    </thead>
+                    <tbody id="unit-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SB_URL = "https://rlttyoforullfzlyeawa.supabase.co";
+    const SB_KEY = "sb_publishable_Poa0upMxgh2GM0JkS17Bkg_XhchIrrb"; 
+
+    window.onload = () => {
+        loadData('categories', 'cat-body');
+        loadData('units', 'unit-body');
+        lucide.createIcons();
+    };
+
+    // Hàm lấy dữ liệu chung
+    async function loadData(table, elementId) {
+        const res = await fetch(`${SB_URL}/rest/v1/${table}?select=*&order=name.asc`, {
+            headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
+        });
+        const data = await res.json();
+        const tbody = document.getElementById(elementId);
+        
+        tbody.innerHTML = data.map(item => `
+            <tr>
+                <td class="fw-medium">${item.name}</td>
+                <td class="text-end">
+                    <button class="btn btn-link text-danger p-0" onclick="deleteItem('${table}', '${item.id}', '${elementId}')">
+                        <i data-lucide="trash-2" style="width:16px"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+        lucide.createIcons();
+    }
+
+    // Hàm thêm mới có kiểm tra trùng
+    async function addItem(table, inputId) {
+        const input = document.getElementById(inputId);
+        const name = input.value.trim();
+        const targetBody = inputId === 'newCatName' ? 'cat-body' : 'unit-body';
+
+        if (!name) return;
+
+        // 1. Kiểm tra trùng trong DB trước khi thêm
+        const check = await fetch(`${SB_URL}/rest/v1/${table}?name=eq.${name}&select=id`, {
+            headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
+        });
+        const existing = await check.json();
+
+        if (existing.length > 0) {
+            alert(`"${name}" đã tồn tại trong danh sách!`);
+            return;
+        }
+
+        // 2. Nếu không trùng thì thêm mới
+        const res = await fetch(`${SB_URL}/rest/v1/${table}`, {
+            method: "POST",
+            headers: { 
+                "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`,
+                "Content-Type": "application/json" 
+            },
+            body: JSON.stringify({ name: name })
+        });
+
+        if (res.ok) {
+            input.value = "";
+            loadData(table, targetBody);
+        }
+    }
+
+    // Hàm xóa
+    async function deleteItem(table, id, bodyId) {
+        if (!confirm("Bạn có chắc muốn xóa mục này?")) return;
+        const res = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {
+            method: "DELETE",
+            headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
+        });
+        if (res.ok) loadData(table, bodyId);
+    }
+</script>
+</body>
+</html>
