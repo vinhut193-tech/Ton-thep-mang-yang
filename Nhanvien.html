@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý nhân viên - Hệ thống</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .main-card { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .table thead { background-color: #f1f4f9; color: #4b5563; font-weight: 600; }
+        .badge-active { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .btn-primary { background-color: #2563eb; border: none; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .form-label { font-weight: 600; color: #374151; margin-top: 0.5rem; }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="text-primary fw-bold"><i class="fas fa-users-cog me-2"></i>Quản lý tài khoản người dùng</h4>
+        <button class="btn btn-primary px-4" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="fas fa-user-plus me-1"></i> Thêm thành viên
+        </button>
+    </div>
+
+    <div class="main-card p-3 mb-3">
+        <div class="row g-2">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" class="form-control border-start-0" placeholder="Tìm tên, username hoặc vai trò...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select"><option>Tất cả vai trò</option></select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select"><option>Trạng thái</option></select>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-card p-0 overflow-hidden">
+        <table class="table table-hover mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th class="ps-4 py-3">HỌ TÊN & USERNAME</th>
+                    <th>VAI TRÒ (CẤP BẬC)</th>
+                    <th>PHÒNG BAN</th>
+                    <th>TRẠNG THÁI</th>
+                    <th class="text-end pe-4">THAO TÁC</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <tr><td colspan="5" class="text-center py-4 text-muted small">Đang tải dữ liệu...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold">THÊM NHÂN VIÊN MỚI</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Họ và Tên *</label>
+                            <input type="text" id="add_fullname" class="form-control" placeholder="Nhập tên nhân viên" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ngày tháng năm sinh</label>
+                            <input type="date" id="add_dob" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Username (Tài khoản) *</label>
+                            <input type="text" id="add_username" class="form-control" placeholder="Ví dụ: nhut.bd01" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Mật khẩu *</label>
+                            <input type="password" id="add_password" class="form-control" required>
+                        </div>
+                        <hr class="my-4 opacity-25">
+                        <div class="col-md-4">
+                            <label class="form-label">Phòng ban</label>
+                            <select id="sel_dept" class="form-select">
+                                <option value="">Chọn phòng...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Cấp bậc</label>
+                            <select id="sel_pos" class="form-select">
+                                <option value="">Chọn cấp bậc...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Chức danh cụ thể</label>
+                            <input type="text" id="add_job" class="form-control" placeholder="VD: Kế toán kho">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" id="btnSaveUser" class="btn btn-primary px-4" onclick="saveUser()">Lưu nhân viên</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- LƯU Ý CHO NHỰT ---
+    // Nhựt vào Supabase -> Project Settings -> API
+    // Copy dòng 'Project URL' dán vào supabaseUrl
+    // Copy dòng 'anon / public' (Dòng rất dài) dán vào supabaseKey
+    const supabaseUrl = 'https://rlttyoforullfzlyeawa.supabase.co'; 
+    const supabaseKey = 'sb_publishable_Poa0upMxgh2GM0JkS17Bkg_XhchIrrb'; 
+    
+    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadFilters();
+        await loadUsers();
+    });
+
+    async function loadFilters() {
+        try {
+            const { data: depts, error: errD } = await _supabase.from('departments').select('*');
+            if (errD) throw errD;
+            const deptSelect = document.getElementById('sel_dept');
+            if(depts) depts.forEach(d => deptSelect.innerHTML += `<option value="${d.id}">${d.name}</option>`);
+
+            const { data: poss, error: errP } = await _supabase.from('positions').select('*');
+            if (errP) throw errP;
+            const posSelect = document.getElementById('sel_pos');
+            if(poss) poss.forEach(p => posSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`);
+        } catch (err) {
+            console.error("Lỗi kết nối Supabase:", err.message);
+        }
+    }
+
+    async function loadUsers() {
+        const { data: users, error } = await _supabase
+            .from('users')
+            .select('*, departments(name), positions(name)')
+            .order('created_at', { ascending: false });
+        
+        const tbody = document.getElementById('userTableBody');
+        tbody.innerHTML = '';
+
+        if (error) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger">Lỗi tải dữ liệu: ${error.message}</td></tr>`;
+            return;
+        }
+
+        if (!users || users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted small">Chưa có nhân viên nào.</td></tr>';
+            return;
+        }
+
+        users.forEach(u => {
+            tbody.innerHTML += `
+                <tr>
+                    <td class="ps-4">
+                        <div class="fw-bold">${u.fullname}</div>
+                        <div class="text-muted small">${u.username}</div>
+                    </td>
+                    <td><span class="badge bg-light text-dark border px-2 py-1">${u.positions?.name || 'Chưa set'}</span></td>
+                    <td>${u.departments?.name || '-'}</td>
+                    <td><span class="badge badge-active px-2 py-1 rounded-pill">Hoạt động</span></td>
+                    <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-outline-secondary me-1"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${u.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    async function saveUser() {
+        const btn = document.getElementById('btnSaveUser');
+        const payload = {
+            fullname: document.getElementById('add_fullname').value,
+            username: document.getElementById('add_username').value,
+            password: document.getElementById('add_password').value,
+            dob: document.getElementById('add_dob').value || null,
+            department_id: document.getElementById('sel_dept').value || null,
+            position_id: document.getElementById('sel_pos').value || null,
+            can_view: true 
+        };
+
+        if (!payload.fullname || !payload.username || !payload.password) {
+            alert("Vui lòng điền các trường bắt buộc (*)");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Đang xử lý...";
+
+        const { error } = await _supabase.from('users').insert([payload]);
+
+        if (error) {
+            alert("Lỗi: " + error.message);
+            btn.disabled = false;
+            btn.innerText = "Lưu nhân viên";
+        } else {
+            alert("Thành công: Nhân viên mới đã được lưu!");
+            location.reload(); 
+        }
+    }
+
+    async function deleteUser(id) {
+        if(confirm("Bạn có chắc muốn xóa nhân viên này?")) {
+            const { error } = await _supabase.from('users').delete().eq('id', id);
+            if(error) alert("Lỗi khi xóa");
+            else loadUsers();
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
