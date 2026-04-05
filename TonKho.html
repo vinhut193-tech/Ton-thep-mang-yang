@@ -1,41 +1,252 @@
 <script>
-// --- PHẦN CHỈNH SỬA CHO SUPABASE ---
-const SUPABASE_URL = "https://rlttyoforullfzlyeawa.supabase.co"; 
-const SUPABASE_KEY = "sb_publishable_Poa0upMxgh2GM0JkS17Bkg_XhchIrrb"; 
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hệ Thống Kho - Mang Yang Steel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --primary: #0d6efd; --bg: #f0f2f5; }
+        body { background-color: var(--bg); font-family: 'Inter', sans-serif; }
+        .nav-tabs .nav-link { color: #4b5563; font-weight: 600; border: none; padding: 1rem 1.5rem; }
+        .nav-tabs .nav-link.active { color: var(--primary); border-bottom: 3px solid var(--primary); background: none; }
+        .stat-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); height: 100%; }
+        .table-container { background: white; border-radius: 12px; padding: 1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .badge-low { background: #fff1f0; color: #ff4d4f; border: 1px solid #ffccc7; }
+        .search-box { max-width: 400px; border-radius: 8px; }
+    </style>
+</head>
+<body>
 
-let rawData = [];
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
+                    <li class="breadcrumb-item active">Kho vận</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold">Tồn kho</h3>
+        </div>
+        <a href="index.html" class="btn btn-outline-secondary btn-sm"><i data-lucide="arrow-left" class="me-1"></i> Quay lại</a>
+    </div>
 
-async function loadData() {
-    try {
-        const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=*", {
-            headers: {
-                "apikey": SUPABASE_KEY,
-                "Authorization": "Bearer " + SUPABASE_KEY
+    <ul class="nav nav-tabs mb-4" id="inventoryTab" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="product-tab" data-bs-toggle="tab" data-bs-target="#product-content"><i data-lucide="box" class="me-2"></i>Theo sản phẩm</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="location-tab" data-bs-toggle="tab" data-bs-target="#location-content"><i data-lucide="map-pin" class="me-2"></i>Theo nơi lưu</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="stat-tab" data-bs-toggle="tab" data-bs-target="#stat-content"><i data-lucide="bar-chart-3" class="me-2"></i>Thống kê</button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="product-content">
+            <div class="table-container">
+                <div class="d-flex mb-3 gap-2">
+                    <input type="text" id="searchProduct" class="form-control search-box" placeholder="Tìm kiếm sản phẩm..." onkeyup="filterProducts()">
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã hàng</th>
+                                <th>Tên hàng</th>
+                                <th>Mã kho</th>
+                                <th>Tổng tồn</th>
+                                <th>Cảnh báo</th>
+                                <th>Đơn vị</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="location-content">
+            <div class="table-container">
+                <table class="table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mã kho</th>
+                            <th>Tên Kho</th>
+                            <th class="text-end">Số mặt hàng</th>
+                            <th class="text-end">Tổng số lượng</th>
+                        </tr>
+                    </thead>
+                    <tbody id="locationTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="stat-content">
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <p class="text-muted mb-1">Tổng tồn</p>
+                        <h2 class="fw-bold" id="totalQty">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <p class="text-muted mb-1">Số kho</p>
+                        <h2 class="fw-bold" id="totalLoc">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <p class="text-muted mb-1">Mặt hàng có tồn</p>
+                        <h2 class="fw-bold" id="totalItems">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="stat-card">
+                        <h6 class="fw-bold mb-4">Tồn theo kho</h6>
+                        <canvas id="chartLoc"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="stat-card">
+                        <h6 class="fw-bold mb-4">Top mặt hàng tồn nhiều nhất</h6>
+                        <canvas id="chartTopItems"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // --- KẾT NỐI SUPABASE (Giữ nguyên giao diện cũ của bạn) ---
+    const SUPABASE_URL = "https://rlttyoforullfzlyeawa.supabase.co"; 
+    const SUPABASE_KEY = "sb_publishable_Poa0upMxgh2GM0JkS17Bkg_XhchIrrb"; 
+
+    let rawData = [];
+
+    async function loadData() {
+        try {
+            // Dùng dấu + để cộng chuỗi cho chắc chắn không lỗi dấu nháy
+            const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=*", {
+                headers: {
+                    "apikey": SUPABASE_KEY,
+                    "Authorization": "Bearer " + SUPABASE_KEY
+                }
+            });
+            
+            const data = await response.json();
+            
+            // Chuyển đổi dữ liệu Supabase sang định dạng của giao diện bạn
+            rawData = data.map(item => ({
+                maSP: item.sku,
+                tenSP: item.name,
+                maKho: item.warehouse_id,
+                onhand: item.stock || 0,
+                limit: item.stock_limit || 5,
+                unit: item.unit || 'Cái'
+            }));
+
+            renderAll();
+            lucide.createIcons();
+        } catch (e) { 
+            console.error("Lỗi:", e);
+            alert("Không thể kết nối đến Supabase. Hãy kiểm tra URL/Key."); 
+        }
+    }
+
+    function renderAll() {
+        renderProductTable();
+        renderLocationTable();
+        renderStats();
+    }
+
+    function renderProductTable() {
+        const html = rawData.map(item => `
+            <tr>
+                <td><span class="badge border text-dark bg-light">${item.maSP}</span></td>
+                <td class="fw-semibold">${item.tenSP}</td>
+                <td>${item.maKho || '---'}</td>
+                <td class="fw-bold">${item.onhand}</td>
+                <td>${item.onhand <= item.limit ? '<span class="badge badge-low">Dưới định mức</span>' : '---'}</td>
+                <td>${item.unit}</td>
+            </tr>
+        `).join('');
+        document.getElementById('productTableBody').innerHTML = html;
+    }
+
+    function renderLocationTable() {
+        const groups = {};
+        rawData.forEach(item => {
+            const k = item.maKho || "Kho khác";
+            if(!groups[k]) groups[k] = { qty: 0, items: 0 };
+            groups[k].qty += Number(item.onhand);
+            groups[k].items += 1;
+        });
+
+        const html = Object.keys(groups).map(k => `
+            <tr>
+                <td><span class="badge border text-dark bg-light">${k}</span></td>
+                <td class="fw-semibold">${k === 'MANGYANG01' ? 'Kho Mang Yang' : 'Kho trung tâm'}</td>
+                <td class="text-end">${groups[k].items}</td>
+                <td class="text-end fw-bold">${groups[k].qty}</td>
+            </tr>
+        `).join('');
+        document.getElementById('locationTableBody').innerHTML = html;
+    }
+
+    function renderStats() {
+        // Clear charts
+        ['chartLoc', 'chartTopItems'].forEach(id => {
+            let chartStatus = Chart.getChart(id);
+            if (chartStatus) chartStatus.destroy();
+        });
+
+        const totalQty = rawData.reduce((sum, item) => sum + Number(item.onhand), 0);
+        document.getElementById('totalQty').innerText = totalQty.toLocaleString();
+        document.getElementById('totalItems').innerText = rawData.length;
+        
+        const locs = [...new Set(rawData.map(i => i.maKho))];
+        document.getElementById('totalLoc').innerText = locs.length;
+
+        new Chart(document.getElementById('chartLoc'), {
+            type: 'bar',
+            data: {
+                labels: locs,
+                datasets: [{ label: 'Số lượng', data: locs.map(l => rawData.filter(i => i.maKho === l).reduce((s,i)=>s+Number(i.onhand),0)), backgroundColor: '#0d6efd' }]
+            },
+            options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+        });
+
+        const top5 = [...rawData].sort((a,b) => b.onhand - a.onhand).slice(0, 5);
+        new Chart(document.getElementById('chartTopItems'), {
+            type: 'bar',
+            data: {
+                labels: top5.map(i => i.maSP),
+                datasets: [{ label: 'Tồn kho', data: top5.map(i => i.onhand), backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'] }]
             }
         });
-        
-        const data = await response.json();
-        
-        // Kiểm tra nếu data là mảng (thành công) hay là object lỗi
-        if (data.error) {
-            console.error("Supabase Error:", data.error);
-            alert("Lỗi bảo mật: Bạn cần chạy lệnh SQL Policy mình gửi lúc nãy!");
-            return;
-        }
-
-        rawData = data.map(item => ({
-            maSP: item.sku,
-            tenSP: item.name,
-            maKho: item.warehouse_id,
-            onhand: item.stock,
-            limit: item.stock_limit,
-            unit: item.unit || 'Cái'
-        }));
-
-        renderAll();
-        lucide.createIcons();
-    } catch (e) { 
-        console.error("Lỗi kết nối:", e);
     }
-}
+
+    function filterProducts() {
+        const val = document.getElementById('searchProduct').value.toLowerCase();
+        const rows = document.getElementById('productTableBody').getElementsByTagName('tr');
+        for (let r of rows) {
+            r.style.display = r.innerText.toLowerCase().includes(val) ? "" : "none";
+        }
+    }
+
+    loadData();
+</script>
+</body>
+</html>
 <script>
