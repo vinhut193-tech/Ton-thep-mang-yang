@@ -1,23 +1,27 @@
 // --- PHẦN CHỈNH SỬA CHO SUPABASE ---
-const SUPABASE_URL = "https://rlttyoforullfzlyeawa.supabase.co"; // URL từ Settings > API
-const SUPABASE_KEY = "sb_publishable_Poa0upMxgh2GM0JkS17Bkg_XhchIrrb"; // Anon Key từ Settings > API
+const SUPABASE_URL = "https://rlttyoforullfzlyeawa.supabase.co"; 
+const SUPABASE_KEY = "sb_publishable_Poa0upMxgh2GM0JkS17Bkg_XhchIrrb"; 
 
 let rawData = [];
 
-// Hàm lấy dữ liệu từ Supabase
 async function loadData() {
     try {
-        // Gọi API của Supabase để lấy bảng products
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*`, {
+        const response = await fetch(SUPABASE_URL + "/rest/v1/products?select=*", {
             headers: {
                 "apikey": SUPABASE_KEY,
-                "Authorization": `Bearer ${SUPABASE_KEY}`
+                "Authorization": "Bearer " + SUPABASE_KEY
             }
         });
         
         const data = await response.json();
         
-        // Chuyển đổi dữ liệu từ Supabase về định dạng mà giao diện của bạn đang dùng
+        // Kiểm tra nếu data là mảng (thành công) hay là object lỗi
+        if (data.error) {
+            console.error("Supabase Error:", data.error);
+            alert("Lỗi bảo mật: Bạn cần chạy lệnh SQL Policy mình gửi lúc nãy!");
+            return;
+        }
+
         rawData = data.map(item => ({
             maSP: item.sku,
             tenSP: item.name,
@@ -30,94 +34,6 @@ async function loadData() {
         renderAll();
         lucide.createIcons();
     } catch (e) { 
-        console.error("Lỗi:", e);
-        alert("Lỗi tải dữ liệu từ Supabase"); 
+        console.error("Lỗi kết nối:", e);
     }
 }
-
-// Chỉnh lại hàm renderProductTable một chút để khớp với dữ liệu mới
-function renderProductTable() {
-    const html = rawData.map(item => `
-        <tr>
-            <td><span class="badge border text-dark bg-light">${item.maSP}</span></td>
-            <td class="fw-semibold">${item.tenSP}</td>
-            <td>${item.maKho || '---'}</td>
-            <td class="fw-bold">${item.onhand}</td>
-            <td>${item.onhand <= item.limit ? '<span class="badge badge-low">Dưới định mức</span>' : '---'}</td>
-            <td>${item.unit}</td>
-        </tr>
-    `).join('');
-    document.getElementById('productTableBody').innerHTML = html;
-}
-// --- HẾT PHẦN CHỈNH SỬA ---
-
-// Các hàm còn lại (renderLocationTable, renderStats, filterProducts) giữ nguyên hoàn toàn
-function renderAll() {
-    renderProductTable();
-    renderLocationTable();
-    renderStats();
-}
-
-function renderLocationTable() {
-    const groups = {};
-    rawData.forEach(item => {
-        const k = item.maKho || "Kho khác";
-        if(!groups[k]) groups[k] = { qty: 0, items: 0 };
-        groups[k].qty += Number(item.onhand);
-        groups[k].items += 1;
-    });
-
-    const html = Object.keys(groups).map(k => `
-        <tr>
-            <td><span class="badge border text-dark bg-light">${k}</span></td>
-            <td class="fw-semibold">${k === 'BDI01' ? 'Kho chi nhánh Bình Định' : 'Kho trung tâm'}</td>
-            <td class="text-end">${groups[k].items}</td>
-            <td class="text-end fw-bold">${groups[k].qty}</td>
-        </tr>
-    `).join('');
-    document.getElementById('locationTableBody').innerHTML = html;
-}
-
-function renderStats() {
-    // Xóa biểu đồ cũ nếu có để tránh lỗi khi render lại
-    const charts = ['chartLoc', 'chartTopItems'];
-    charts.forEach(id => {
-        let chartStatus = Chart.getChart(id);
-        if (chartStatus) chartStatus.destroy();
-    });
-
-    const totalQty = rawData.reduce((sum, item) => sum + Number(item.onhand), 0);
-    document.getElementById('totalQty').innerText = totalQty.toLocaleString();
-    document.getElementById('totalItems').innerText = rawData.length;
-    
-    const locs = [...new Set(rawData.map(i => i.maKho))];
-    document.getElementById('totalLoc').innerText = locs.length;
-
-    new Chart(document.getElementById('chartLoc'), {
-        type: 'bar',
-        data: {
-            labels: locs,
-            datasets: [{ label: 'Số lượng', data: locs.map(l => rawData.filter(i => i.maKho === l).reduce((s,i)=>s+Number(i.onhand),0)), backgroundColor: '#0d6efd' }]
-        },
-        options: { indexAxis: 'y', plugins: { legend: { display: false } } }
-    });
-
-    const top5 = [...rawData].sort((a,b) => b.onhand - a.onhand).slice(0, 5);
-    new Chart(document.getElementById('chartTopItems'), {
-        type: 'bar',
-        data: {
-            labels: top5.map(i => i.maSP),
-            datasets: [{ label: 'Tồn kho', data: top5.map(i => i.onhand), backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'] }]
-        }
-    });
-}
-
-function filterProducts() {
-    const val = document.getElementById('searchProduct').value.toLowerCase();
-    const rows = document.getElementById('productTableBody').getElementsByTagName('tr');
-    for (let r of rows) {
-        r.style.display = r.innerText.toLowerCase().includes(val) ? "" : "none";
-    }
-}
-
-loadData();
