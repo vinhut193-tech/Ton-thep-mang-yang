@@ -8,29 +8,40 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --primary: #0d6efd; --bg: #f8fafc; }
+        :root { --primary: #0d6efd; --bg: #f8fafc; --border: #e2e8f0; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: #334155; margin: 0; }
         
-        /* Sidebar mini bên trái */
-        .sidebar-mini { width: 70px; background: white; border-right: 1px solid #e2e8f0; height: 100vh; position: fixed; display: flex; flex-direction: column; align-items: center; padding: 20px 0; z-index: 100; }
+        /* Login Style */
+        #login-page { 
+            height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .login-card { 
+            background: white; padding: 2.5rem; border-radius: 24px; 
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); width: 100%; max-width: 400px;
+        }
+        .login-logo { margin-bottom: 1.5rem; color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 800; font-size: 1.25rem; }
+
+        /* Sidebar mini */
+        .sidebar-mini { width: 70px; background: white; border-right: 1px solid var(--border); height: 100vh; position: fixed; display: flex; flex-direction: column; align-items: center; padding: 20px 0; z-index: 100; }
         .sidebar-item { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin-bottom: 15px; cursor: pointer; transition: 0.2s; color: #64748b; }
         .sidebar-item.active { background: #eff6ff; color: #0d6efd; }
-        .sidebar-item:hover { background: #f1f5f9; }
 
         .main-container { margin-left: 70px; padding: 2rem 3rem; }
 
         /* Header chuyên nghiệp */
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
-        .user-profile { display: flex; align-items: center; gap: 12px; background: white; padding: 6px 15px; border-radius: 50px; border: 1px solid #e2e8f0; }
+        .search-bar { position: relative; width: 300px; }
+        .search-bar input { background: white; border: 1px solid var(--border); padding: 8px 15px 8px 40px; border-radius: 12px; width: 100%; font-size: 0.9rem; outline: none; }
+        .search-bar i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
 
-        /* Typography */
-        .greeting h2 { font-weight: 800; font-size: 1.75rem; letter-spacing: -0.5px; }
-        .category-label { font-size: 0.8rem; font-weight: 700; color: #0d6efd; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.5rem; margin-top: 2.5rem; display: block; border-left: 4px solid #0d6efd; padding-left: 12px; }
+        .user-profile { display: flex; align-items: center; gap: 12px; background: white; padding: 6px 15px; border-radius: 50px; border: 1px solid var(--border); }
 
         /* Grid & Cards */
+        .category-label { font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin: 2.5rem 0 1.5rem 0; display: block; border-left: 4px solid var(--primary); padding-left: 12px; }
         .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
-        .module-card { background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 1.75rem; display: flex; align-items: flex-start; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none; color: inherit; position: relative; }
-        .module-card:hover { transform: translateY(-5px); border-color: #0d6efd; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); }
+        .module-card { background: white; border: 1px solid var(--border); border-radius: 20px; padding: 1.75rem; display: flex; align-items: flex-start; transition: all 0.3s; text-decoration: none; color: inherit; position: relative; }
+        .module-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 15px 30px rgba(0,0,0,0.05); }
         
         .icon-wrap { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-right: 1.25rem; flex-shrink: 0; }
         .bg-blue { background: #eff6ff; color: #3b82f6; }
@@ -38,17 +49,38 @@
         .bg-orange { background: #fff7ed; color: #f59e0b; }
         .bg-purple { background: #faf5ff; color: #8b5cf6; }
 
-        .card-body-content h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem; color: #1e293b; }
-        .card-body-content p { font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.5; }
-        
         .badge-new { position: absolute; top: 1.5rem; right: 1.5rem; background: #fee2e2; color: #ef4444; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; }
-        
-        .hidden { display: none; }
+        .hidden { display: none !important; }
+        #real-time-clock { font-weight: 600; color: var(--primary); }
     </style>
 </head>
 <body>
 
-<div id="app-page">
+<div id="login-page">
+    <div class="login-card">
+        <div class="login-logo">
+            <i data-lucide="box"></i> MANG YANG STEEL
+        </div>
+        <h5 class="text-center fw-bold mb-1">Chào mừng trở lại</h5>
+        <p class="text-center text-muted small mb-4">Vui lòng đăng nhập mã nhân viên</p>
+        
+        <div class="mb-3">
+            <label class="small fw-bold mb-1">Tài khoản (Username)</label>
+            <input type="text" id="username" class="form-control" style="border-radius: 12px; padding: 10px;" placeholder="Ví dụ: NV001">
+        </div>
+        <div class="mb-4">
+            <label class="small fw-bold mb-1">Mật khẩu</label>
+            <input type="password" id="password" class="form-control" style="border-radius: 12px; padding: 10px;" placeholder="••••••••">
+        </div>
+        
+        <button class="btn btn-primary w-100 fw-bold py-2" style="border-radius: 12px;" onclick="doLogin()" id="login-btn">
+            Đăng nhập ngay
+        </button>
+        <div id="login-msg" class="text-danger small text-center mt-3"></div>
+    </div>
+</div>
+
+<div id="app-page" class="hidden">
     <div class="sidebar-mini">
         <div class="sidebar-item active"><i data-lucide="layout-grid"></i></div>
         <div class="sidebar-item"><i data-lucide="bell"></i></div>
@@ -59,84 +91,151 @@
     <div class="main-container">
         <div class="top-header">
             <div class="greeting">
-                <p class="text-muted small mb-1" id="current-date">Thứ Hai, 06 Tháng 4, 2026</p>
-                <h2 id="welcome-text">Chào buổi chiều, <span id="user-display">Phan Đình Vi Nhựt</span> 👋</h2>
+                <p class="text-muted small mb-1">
+                    <span id="current-date"></span> | <span id="real-time-clock">00:00:00</span>
+                </p>
+                <h2 id="welcome-text" class="fw-bold">Chào buổi chiều, <span id="user-display">...</span> 👋</h2>
             </div>
+            
+            <div class="search-bar">
+                <i data-lucide="search"></i>
+                <input type="text" placeholder="Tìm kiếm nhanh module..." onkeyup="searchModule(this)">
+            </div>
+
             <div class="user-profile">
                 <div class="text-end" style="line-height: 1.2;">
-                    <div class="fw-bold small" id="user-role">Quản trị viên</div>
+                    <div class="fw-bold small" id="user-role">...</div>
                     <small class="text-muted" style="font-size: 10px;">Mang Yang Steel</small>
                 </div>
-                <img src="https://ui-avatars.com/api/?name=Nhut&background=0D6EFD&color=fff" width="35" class="rounded-circle">
+                <img id="user-avatar" src="" width="35" class="rounded-circle">
             </div>
         </div>
 
-        <span class="category-label">Kho Vận & Sản xuất</span>
-        <div class="module-grid">
-            <a href="Khovan.html" class="module-card">
-                <div class="icon-wrap bg-blue"><i data-lucide="warehouse"></i></div>
-                <div class="card-body-content">
-                    <h4>Kho vận</h4>
-                    <p>Quản lý nhập xuất tồn, kiểm kê hàng hóa và điều phối vật tư.</p>
-                </div>
-            </a>
-            <a href="Production.html" class="module-card">
-                <div class="icon-wrap bg-orange"><i data-lucide="factory"></i></div>
-                <div class="card-body-content">
-                    <h4>Sản xuất</h4>
-                    <p>Theo dõi lệnh sản xuất, gia công cắt tấm và tiến độ xưởng.</p>
-                </div>
-            </a>
-        </div>
+        <div id="content-area">
+            <span class="category-label">Kho Vận & Sản xuất</span>
+            <div class="module-grid">
+                <a href="Khovan.html" class="module-card" data-name="kho vận nhập xuất tồn">
+                    <div class="icon-wrap bg-blue"><i data-lucide="warehouse"></i></div>
+                    <div class="card-body-content">
+                        <h4>Kho vận</h4>
+                        <p>Quản lý nhập xuất tồn, kiểm kê hàng hóa và điều phối vật tư.</p>
+                    </div>
+                </a>
+                <a href="Production.html" class="module-card" data-name="sản xuất lệnh gia công">
+                    <div class="icon-wrap bg-orange"><i data-lucide="factory"></i></div>
+                    <div class="card-body-content">
+                        <h4>Sản xuất</h4>
+                        <p>Theo dõi lệnh sản xuất, gia công cắt tấm và tiến độ xưởng.</p>
+                    </div>
+                </a>
+            </div>
 
-        <span class="category-label">Kinh Doanh & Khách hàng</span>
-        <div class="module-grid">
-            <a href="Kinhdoanh.html" class="module-card">
-                <div class="icon-wrap bg-green"><i data-lucide="shopping-bag"></i></div>
-                <div class="card-body-content">
-                    <h4>Kinh doanh</h4>
-                    <p>Hồ sơ khách hàng, báo giá, đơn hàng bán và hợp đồng kinh tế.</p>
-                </div>
-                <span class="badge-new">Ưu tiên</span>
-            </a>
-            <a href="Congno.html" class="module-card">
-                <div class="icon-wrap bg-purple"><i data-lucide="credit-card"></i></div>
-                <div class="card-body-content">
-                    <h4>Kế toán công nợ</h4>
-                    <p>Theo dõi nợ phải thu, thanh toán hóa đơn và đối soát định kỳ.</p>
-                </div>
-            </a>
-        </div>
+            <span class="category-label">Kinh Doanh & Khách hàng</span>
+            <div class="module-grid">
+                <a href="Kinhdoanh.html" class="module-card" data-name="kinh doanh báo giá hợp đồng">
+                    <div class="icon-wrap bg-green"><i data-lucide="shopping-bag"></i></div>
+                    <div class="card-body-content">
+                        <h4>Kinh doanh</h4>
+                        <p>Hồ sơ khách hàng, báo giá, đơn hàng bán và hợp đồng.</p>
+                    </div>
+                    <span class="badge-new">Ưu tiên</span>
+                </a>
+                <a href="Congno.html" class="module-card" data-name="kế toán công nợ thanh toán">
+                    <div class="icon-wrap bg-purple"><i data-lucide="credit-card"></i></div>
+                    <div class="card-body-content">
+                        <h4>Kế toán công nợ</h4>
+                        <p>Theo dõi nợ phải thu, thanh toán hóa đơn và đối soát.</p>
+                    </div>
+                </a>
+            </div>
 
-        <span class="category-label">Quản trị hệ thống</span>
-        <div class="module-grid">
-            <a href="Hethong.html" class="module-card">
-                <div class="icon-wrap bg-blue" style="background: #f1f5f9; color: #475569;"><i data-lucide="settings-2"></i></div>
-                <div class="card-body-content">
-                    <h4>Cấu hình hệ thống</h4>
-                    <p>Quản lý nhân viên, phân quyền người dùng và tham số hệ thống.</p>
-                </div>
-            </a>
+            <span class="category-label">Quản trị hệ thống</span>
+            <div class="module-grid">
+                <a href="Hethong.html" class="module-card" data-name="cấu hình hệ thống quản trị nhân viên">
+                    <div class="icon-wrap bg-blue" style="background: #f1f5f9; color: #475569;"><i data-lucide="settings-2"></i></div>
+                    <div class="card-body-content">
+                        <h4>Cấu hình hệ thống</h4>
+                        <p>Quản lý nhân viên, phân quyền người dùng và tham số.</p>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Khởi tạo icons
-    lucide.createIcons();
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2niInya7Wz9kmDLDdL4Ip6eLkw33Rwdafv6c-fQoiTO2XV6X2ShxnakVPHz31XkMJzA/exec";
 
-    // Hàm cập nhật ngày tháng
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('current-date').innerText = new Date().toLocaleDateString('vi-VN', options);
+    // 1. Cập nhật thời gian thực
+    function updateTime() {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').innerText = now.toLocaleDateString('vi-VN', options);
+        document.getElementById('real-time-clock').innerText = now.toLocaleTimeString('vi-VN');
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    // 2. Xử lý Đăng nhập
+    async function doLogin() {
+        const u = document.getElementById('username').value;
+        const p = document.getElementById('password').value;
+        const btn = document.getElementById('login-btn');
+        const msg = document.getElementById('login-msg');
+
+        if(!u || !p) { msg.innerText = "Vui lòng nhập đầy đủ thông tin!"; return; }
+
+        btn.innerText = "Đang xác thực..."; btn.disabled = true;
+        msg.innerText = "";
+
+        try {
+            const response = await fetch(`${SCRIPT_URL}?action=login&u=${u}&p=${p}`);
+            const data = await response.json();
+
+            if(data.status === "success") {
+                localStorage.setItem('loggedUser', JSON.stringify(data));
+                checkAuth();
+            } else {
+                msg.innerText = "Tài khoản hoặc mật khẩu không chính xác!";
+                btn.innerText = "Đăng nhập ngay"; btn.disabled = false;
+            }
+        } catch (e) {
+            msg.innerText = "Lỗi kết nối hệ thống!";
+            btn.innerText = "Đăng nhập ngay"; btn.disabled = false;
+        }
+    }
+
+    // 3. Kiểm tra quyền và Hiển thị UI
+    function checkAuth() {
+        const user = JSON.parse(localStorage.getItem('loggedUser'));
+        if(user) {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('app-page').classList.remove('hidden');
+            document.getElementById('user-display').innerText = user.name;
+            document.getElementById('user-role').innerText = user.role || "Nhân viên";
+            document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0D6EFD&color=fff`;
+            lucide.createIcons();
+        }
+    }
+
+    // 4. Tìm kiếm Module nhanh
+    function searchModule(input) {
+        let filter = input.value.toLowerCase();
+        let cards = document.querySelectorAll('.module-card');
+        cards.forEach(card => {
+            let name = card.getAttribute('data-name');
+            card.style.display = name.includes(filter) ? "flex" : "none";
+        });
+    }
 
     function logout() {
-        if(confirm("Bạn có chắc chắn muốn đăng xuất không?")) {
+        if(confirm("Xác nhận đăng xuất khỏi hệ thống?")) {
             localStorage.removeItem('loggedUser');
             location.reload();
         }
     }
 
-    // Logic kiểm tra đăng nhập có thể thêm tại đây
+    window.onload = checkAuth;
 </script>
 </body>
 </html>
