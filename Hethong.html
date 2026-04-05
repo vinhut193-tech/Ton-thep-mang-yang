@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Cấu hình Hệ thống - Mang Yang Steel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --primary: #0d6efd; --bg: #f8fafd; --text-main: #334155; --text-sub: #64748b; }
+        body { background-color: var(--bg); font-family: 'Inter', sans-serif; color: var(--text-main); }
+        
+        /* Header style khớp với ảnh mẫu */
+        .header-section { background: white; padding: 0.75rem 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
+        .breadcrumb-custom { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .badge-path { background: #eff6ff; color: #0d6efd; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+
+        /* Filter bar */
+        .filter-bar { background: white; padding: 10px 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; gap: 10px; align-items: center; }
+
+        /* Group Title */
+        .group-section { padding: 1.5rem 1.5rem 0.5rem 1.5rem; }
+        .group-title { font-size: 13px; font-weight: 700; color: #0d6efd; border-left: 3px solid #0d6efd; padding-left: 10px; margin-bottom: 15px; }
+
+        /* Layout Grid */
+        .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; padding: 0 1.5rem; }
+
+        /* Card Style giống image_0314ef.png */
+        .nav-card { background: white; border: 1px solid #f1f5f9; border-radius: 10px; padding: 1rem; display: flex; align-items: center; transition: all 0.2s; cursor: pointer; text-decoration: none; color: inherit; position: relative; }
+        .nav-card:hover { border-color: #0d6efd; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        
+        .icon-box { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0; }
+        .bg-purple { background: #f5f3ff; color: #7c3aed; }
+        .bg-orange { background: #fff7ed; color: #ea580c; }
+        .bg-blue { background: #eff6ff; color: #2563eb; }
+        .bg-green { background: #f0fdf4; color: #16a34a; }
+        .bg-red { background: #fef2f2; color: #dc2626; }
+        .bg-cyan { background: #ecfeff; color: #0891b2; }
+
+        .card-info h4 { font-size: 14px; font-weight: 600; margin: 0; }
+        .card-info p { font-size: 12px; color: var(--text-sub); margin: 2px 0 0 0; }
+        
+        .chevron-right { position: absolute; right: 12px; color: #cbd5e1; width: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="header-section">
+    <div class="breadcrumb-custom">
+        <i data-lucide="home" style="width:14px"></i> 
+        <span class="text-muted">Trang chủ</span> 
+        <i data-lucide="chevron-right" style="width:12px"></i>
+        <span class="badge-path">Hệ thống</span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <div class="text-end" style="line-height: 1.2;">
+            <div class="fw-bold" style="font-size:13px">Lê Minh Công</div>
+            <small class="text-muted">Admin</small>
+        </div>
+        <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center" style="width:35px; height:35px; font-weight:bold; color:white;">LC</div>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <button class="btn btn-sm btn-light border d-flex align-items-center gap-2" onclick="history.back()">
+        <i data-lucide="arrow-left" style="width:14px"></i> Quay lại
+    </button>
+    <div class="btn-group">
+        <button class="btn btn-sm btn-outline-primary active">Tất cả</button>
+        <button class="btn btn-sm btn-outline-primary">Đánh dấu</button>
+    </div>
+    <div class="input-group input-group-sm" style="width: 300px;">
+        <span class="input-group-text bg-white"><i data-lucide="search" style="width:14px"></i></span>
+        <input type="text" class="form-control border-start-0" placeholder="Tìm module theo tên hoặc mô tả...">
+    </div>
+</div>
+
+<div class="group-section">
+    <div class="group-title">Sơ đồ</div>
+</div>
+<div class="module-grid">
+    <a href="Phongban.html" class="nav-card">
+        <div class="icon-box bg-purple"><i data-lucide="building-2"></i></div>
+        <div class="card-info">
+            <h4>Phòng ban</h4>
+            <p>Cơ cấu tổ chức đơn vị.</p>
+        </div>
+        <i data-lucide="chevron-right" class="chevron-right"></i>
+    </a>
+    <a href="Capbac.html" class="nav-card">
+        <div class="icon-box bg-orange"><i data-lucide="layers"></i></div>
+        <div class="card-info">
+            <h4>Cấp bậc</h4>
+            <p>Hệ thống thang bảng lương/level.</p>
+        </div>
+    </a>
+    <a href="Chucvu.html" class="nav-card">
+        <div class="icon-box bg-blue"><i data-lucide="briefcase"></i></div>
+        <div class="card-info">
+            <h4>Chức vụ</h4>
+            <p>Quản lý các vị trí công việc.</p>
+        </div>
+    </a>
+    <a href="Nhiemvu.html" class="nav-card">
+        <div class="icon-box bg-purple"><i data-lucide="clipboard-list"></i></div>
+        <div class="card-info">
+            <h4>Chức năng nhiệm vụ</h4>
+            <p>Sứ mệnh, KPI và nhiệm vụ phòng ban.</p>
+        </div>
+    </a>
+    <a href="User.html" class="nav-card">
+        <div class="icon-box bg-green"><i data-lucide="users"></i></div>
+        <div class="card-info">
+            <h4>Nhân viên</h4>
+            <p>Hồ sơ và thông tin nhân sự.</p>
+        </div>
+    </a>
+</div>
+
+<div class="group-section">
+    <div class="group-title">Bảo mật & Cấu hình</div>
+</div>
+<div class="module-grid mb-5">
+    <a href="Congty.html" class="nav-card">
+        <div class="icon-box bg-purple"><i data-lucide="component"></i></div>
+        <div class="card-info">
+            <h4>Thông tin công ty</h4>
+            <p>Thiết lập thông tin pháp nhân.</p>
+        </div>
+    </a>
+    <a href="Chinhanh.html" class="nav-card">
+        <div class="icon-box bg-blue"><i data-lucide="map-pin"></i></div>
+        <div class="card-info">
+            <h4>Chi nhánh</h4>
+            <p>Quản lý danh sách chi nhánh và địa điểm.</p>
+        </div>
+    </a>
+    <a href="Phanquyen.html" class="nav-card">
+        <div class="icon-box bg-red"><i data-lucide="shield-check"></i></div>
+        <div class="card-info">
+            <h4>Phân quyền</h4>
+            <p>Vai trò và quyền hạn truy cập.</p>
+        </div>
+    </a>
+    <a href="Backup.html" class="nav-card">
+        <div class="icon-box bg-cyan"><i data-lucide="refresh-cw"></i></div>
+        <div class="card-info">
+            <h4>Sao lưu & Khôi phục</h4>
+            <p>Xuất, nhập và khôi phục dữ liệu.</p>
+        </div>
+    </a>
+    <a href="Thietbi.html" class="nav-card">
+        <div class="icon-box bg-green"><i data-lucide="monitor"></i></div>
+        <div class="card-info">
+            <h4>Thiết bị đăng nhập</h4>
+            <p>Quản lý thiết bị và đăng xuất từ xa.</p>
+        </div>
+    </a>
+</div>
+
+<script>
+    lucide.createIcons();
+</script>
+</body>
+</html>
