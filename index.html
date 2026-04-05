@@ -2,215 +2,141 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Hệ Thống Quản Trị Mang Yang Steel</title>
+    <title>Hệ Thống Mang Yang Steel</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --primary-bg: #f8fafd; --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); }
-        body { font-family: 'Inter', sans-serif; background-color: var(--primary-bg); color: #2d3436; margin: 0; }
+        :root { --primary: #0d6efd; --bg: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: #334155; margin: 0; }
         
-        #login-page { background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%); height: 100vh; display: flex; align-items: center; justify-content: center; position: fixed; width: 100%; top: 0; left: 0; z-index: 1000; }
-        .login-card { background: white; padding: 2.5rem; border-radius: 1.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.2); width: 100%; max-width: 400px; text-align: center; }
+        /* Sidebar mini bên trái */
+        .sidebar-mini { width: 70px; background: white; border-right: 1px solid #e2e8f0; height: 100vh; position: fixed; display: flex; flex-direction: column; align-items: center; padding: 20px 0; z-index: 100; }
+        .sidebar-item { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin-bottom: 15px; cursor: pointer; transition: 0.2s; color: #64748b; }
+        .sidebar-item.active { background: #eff6ff; color: #0d6efd; }
+        .sidebar-item:hover { background: #f1f5f9; }
 
-        .sidebar { background: white; min-height: 100vh; border-right: 1px solid #edf2f7; width: 80px; position: fixed; display: flex; flex-direction: column; align-items: center; padding-top: 20px; z-index: 100; }
-        .main-content { margin-left: 80px; padding: 2rem; }
-        
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; background: white; padding: 1rem 2rem; border-radius: 1rem; box-shadow: var(--card-shadow); }
-        
-        .category-title { font-size: 0.9rem; font-weight: 700; color: #0d6efd; text-transform: uppercase; border-left: 4px solid #0d6efd; padding-left: 10px; margin: 2rem 0 1rem 0; }
-        .category-title.kinh-doanh { color: #198754; border-color: #198754; }
+        .main-container { margin-left: 70px; padding: 2rem 3rem; }
 
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
-        
-        .module-card { background: white; border: none; border-radius: 1.25rem; padding: 1.5rem; transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; box-shadow: var(--card-shadow); border: 1px solid transparent; }
-        .module-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); border: 1px solid #0d6efd; }
-        
-        .icon-box { width: 56px; height: 56px; border-radius: 1rem; display: flex; align-items: center; justify-content: center; margin-right: 1.25rem; flex-shrink: 0; }
-        .module-info h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem; color: #1e293b; }
-        .module-info p { font-size: 0.85rem; color: #64748b; margin: 0; }
+        /* Header chuyên nghiệp */
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
+        .user-profile { display: flex; align-items: center; gap: 12px; background: white; padding: 6px 15px; border-radius: 50px; border: 1px solid #e2e8f0; }
 
-        .bg-blue { background: #e7f0ff; color: #0d6efd; }
-        .bg-green { background: #e6fffa; color: #059669; }
-        .bg-orange { background: #fffaf0; color: #d97706; }
-        .bg-purple { background: #f5f3ff; color: #7c3aed; }
-        .bg-red { background: #fff5f5; color: #dc3545; }
+        /* Typography */
+        .greeting h2 { font-weight: 800; font-size: 1.75rem; letter-spacing: -0.5px; }
+        .category-label { font-size: 0.8rem; font-weight: 700; color: #0d6efd; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.5rem; margin-top: 2.5rem; display: block; border-left: 4px solid #0d6efd; padding-left: 12px; }
 
-        #time-now { font-weight: 700; color: #0d6efd; background: #e7f0ff; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; }
-        .hidden { display: none !important; }
+        /* Grid & Cards */
+        .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+        .module-card { background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 1.75rem; display: flex; align-items: flex-start; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none; color: inherit; position: relative; }
+        .module-card:hover { transform: translateY(-5px); border-color: #0d6efd; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); }
+        
+        .icon-wrap { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-right: 1.25rem; flex-shrink: 0; }
+        .bg-blue { background: #eff6ff; color: #3b82f6; }
+        .bg-green { background: #f0fdf4; color: #10b981; }
+        .bg-orange { background: #fff7ed; color: #f59e0b; }
+        .bg-purple { background: #faf5ff; color: #8b5cf6; }
+
+        .card-body-content h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem; color: #1e293b; }
+        .card-body-content p { font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.5; }
+        
+        .badge-new { position: absolute; top: 1.5rem; right: 1.5rem; background: #fee2e2; color: #ef4444; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; }
+        
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<div id="login-page">
-    <div class="login-card">
-        <h3 class="fw-bold mb-4">MANG YANG STEEL</h3>
-        <p class="text-muted mb-4">Vui lòng đăng nhập để tiếp tục</p>
-        <input type="text" id="user" class="form-control form-control-lg mb-3" placeholder="Tên đăng nhập">
-        <input type="password" id="pass" class="form-control form-control-lg mb-3" placeholder="Mật khẩu">
-        <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="doLogin()" id="login-btn">Vào hệ thống</button>
-    </div>
-</div>
-
-<div id="app-page" class="hidden">
-    <div class="sidebar d-none d-md-flex">
-        <div class="mb-5"><i data-lucide="layers" class="text-primary" style="width: 32px; height: 32px;"></i></div>
-        <div class="mb-4" style="cursor:pointer" title="Trang chủ" onclick="location.reload()"><i data-lucide="home"></i></div>
-        <div class="mt-auto mb-4" title="Đăng xuất" style="cursor:pointer" onclick="logout()">
-            <i data-lucide="log-out" class="text-danger"></i>
-        </div>
+<div id="app-page">
+    <div class="sidebar-mini">
+        <div class="sidebar-item active"><i data-lucide="layout-grid"></i></div>
+        <div class="sidebar-item"><i data-lucide="bell"></i></div>
+        <div class="sidebar-item"><i data-lucide="settings"></i></div>
+        <div class="mt-auto sidebar-item text-danger" onclick="logout()"><i data-lucide="log-out"></i></div>
     </div>
 
-    <div class="main-content">
-        <div class="header-top">
-            <div>
-                <h4 class="fw-bold mb-0 text-primary">DASHBOARD</h4>
-                <div class="d-flex align-items-center gap-2 mt-1">
-                    <p class="text-muted small mb-0" id="current-date"></p>
-                    <span id="time-now">00:00:00</span>
-                </div>
+    <div class="main-container">
+        <div class="top-header">
+            <div class="greeting">
+                <p class="text-muted small mb-1" id="current-date">Thứ Hai, 06 Tháng 4, 2026</p>
+                <h2 id="welcome-text">Chào buổi chiều, <span id="user-display">Phan Đình Vi Nhựt</span> 👋</h2>
             </div>
-            <div class="d-flex align-items-center">
-                <div class="text-end me-3">
-                    <div class="fw-bold" id="user-name"></div>
-                    <div class="text-success small" style="cursor:pointer" onclick="logout()">Đăng xuất</div>
+            <div class="user-profile">
+                <div class="text-end" style="line-height: 1.2;">
+                    <div class="fw-bold small" id="user-role">Quản trị viên</div>
+                    <small class="text-muted" style="font-size: 10px;">Mang Yang Steel</small>
                 </div>
-                <img src="https://ui-avatars.com/api/?background=0D6EFD&color=fff&name=Admin" class="rounded-circle" width="45" style="cursor:pointer" onclick="logout()">
+                <img src="https://ui-avatars.com/api/?name=Nhut&background=0D6EFD&color=fff" width="35" class="rounded-circle">
             </div>
         </div>
 
-        <h2 class="fw-bold mb-4"><span id="greeting-text">Chào bạn</span>, <span id="welcome-name"></span> 👋</h2>
-        
-        <div id="group-kho-van" class="hidden">
-            <div class="category-title">Kho Vận</div>
-            <div class="grid-container" id="grid-kho-van"></div>
+        <span class="category-label">Kho Vận & Sản xuất</span>
+        <div class="module-grid">
+            <a href="Khovan.html" class="module-card">
+                <div class="icon-wrap bg-blue"><i data-lucide="warehouse"></i></div>
+                <div class="card-body-content">
+                    <h4>Kho vận</h4>
+                    <p>Quản lý nhập xuất tồn, kiểm kê hàng hóa và điều phối vật tư thép.</p>
+                </div>
+            </a>
+            <a href="Production.html" class="module-card">
+                <div class="icon-wrap bg-orange"><i data-lucide="factory"></i></div>
+                <div class="card-body-content">
+                    <h4>Sản xuất</h4>
+                    <p>Theo dõi lệnh sản xuất, gia công cắt tấm và tiến độ xưởng.</p>
+                </div>
+            </a>
         </div>
 
-        <div id="group-kinh-doanh" class="hidden">
-            <div class="category-title kinh-doanh">Kinh Doanh</div>
-            <div class="grid-container" id="grid-kinh-doanh"></div>
+        <span class="category-label">Kinh Doanh & Khách hàng</span>
+        <div class="module-grid">
+            <a href="Kinhdoanh.html" class="module-card">
+                <div class="icon-wrap bg-green"><i data-lucide="shopping-bag"></i></div>
+                <div class="card-body-content">
+                    <h4>Kinh doanh</h4>
+                    <p>Hồ sơ khách hàng, báo giá, đơn hàng bán và hợp đồng kinh tế.</p>
+                </div>
+                <span class="badge-new">Ưu tiên</span>
+            </a>
+            <a href="Congno.html" class="module-card">
+                <div class="icon-wrap bg-purple"><i data-lucide="credit-card"></i></div>
+                <div class="card-body-content">
+                    <h4>Kế toán công nợ</h4>
+                    <p>Theo dõi nợ phải thu, thanh toán hóa đơn và đối soát định kỳ.</p>
+                </div>
+            </a>
+        </div>
+
+        <span class="category-label">Quản trị hệ thống</span>
+        <div class="module-grid">
+            <a href="Hethong.html" class="module-card">
+                <div class="icon-wrap bg-blue" style="background: #f1f5f9; color: #475569;"><i data-lucide="settings-2"></i></div>
+                <div class="card-body-content">
+                    <h4>Cấu hình hệ thống</h4>
+                    <p>Quản lý nhân viên, phân quyền người dùng và tham số hệ thống.</p>
+                </div>
+            </a>
         </div>
     </div>
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2niInya7Wz9kmDLDdL4Ip6eLkw33Rwdafv6c-fQoiTO2XV6X2ShxnakVPHz31XkMJzA/exec";
-let userAuth = null;
-
-// Cấu hình Module
-const moduleConfigs = {
-    "Kho Vận": { group: "kho", icon: "warehouse", color: "bg-blue", desc: "Quản lý Nhập - Xuất - Tồn kho." },
-    "Kinh Doanh": { group: "kinhdoanh", icon: "shopping-cart", color: "bg-green", desc: "Đơn hàng & Giao hàng." },
-    "CongNo": { group: "kinhdoanh", icon: "credit-card", color: "bg-orange", desc: "Theo dõi công nợ khách hàng." },
-    "ThuChi": { group: "kinhdoanh", icon: "wallet", color: "bg-purple", desc: "Dòng tiền & Chi phí." },
-    "User": { group: "hethong", icon: "users", color: "bg-red", desc: "Nhân sự & Phân quyền." }
-};
-
-function updateTime() {
-    const now = new Date();
-    const hours = now.getHours();
-    document.getElementById('time-now').innerText = now.toLocaleTimeString('vi-VN');
-    let greeting = "Chào buổi tối";
-    if (hours < 12) greeting = "Chào buổi sáng";
-    else if (hours < 18) greeting = "Chào buổi chiều";
-    if (document.getElementById('greeting-text')) document.getElementById('greeting-text').innerText = greeting;
-}
-
-function checkAuth() {
-    const savedUser = localStorage.getItem('loggedUser');
-    if (savedUser) {
-        userAuth = JSON.parse(savedUser);
-        showAppPage();
-    }
-}
-checkAuth();
-
-async function doLogin() {
-    const u = document.getElementById('user').value;
-    const p = document.getElementById('pass').value;
-    const btn = document.getElementById('login-btn');
-    if(!u || !p) return alert("Vui lòng nhập đủ thông tin!");
-    btn.innerText = "Đang kết nối..."; btn.disabled = true;
-    try {
-        const res = await fetch(`${SCRIPT_URL}?action=login&u=${u}&p=${p}`);
-        const data = await res.json();
-        if(data.status === "success") {
-            userAuth = data;
-            localStorage.setItem('loggedUser', JSON.stringify(data)); 
-            showAppPage();
-        } else {
-            alert(data.message); btn.innerText = "Vào hệ thống"; btn.disabled = false;
-        }
-    } catch(e) {
-        alert("Lỗi kết nối!"); btn.disabled = false; btn.innerText = "Vào hệ thống";
-    }
-}
-
-function showAppPage() {
-    document.getElementById('login-page').classList.add('hidden');
-    document.getElementById('app-page').classList.remove('hidden');
-    document.getElementById('user-name').innerText = userAuth.name;
-    document.getElementById('welcome-name').innerText = userAuth.name;
-    document.getElementById('current-date').innerText = new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    updateTime();
-    setInterval(updateTime, 1000);
-    renderDashboard();
-}
-
-function logout() {
-    if(confirm("Bạn muốn đăng xuất?")) { localStorage.removeItem('loggedUser'); location.reload(); }
-}
-
-function renderDashboard() {
-    const gridKho = document.getElementById('grid-kho-van');
-    const gridKinhDoanh = document.getElementById('grid-kinh-doanh');
-    gridKho.innerHTML = ""; gridKinhDoanh.innerHTML = "";
-
-    // Lấy danh sách module từ quyền của User
-    const modules = userAuth.permissions.read;
-    let hasKho = false; let hasKinhDoanh = false;
-
-    modules.forEach(mod => {
-        // Kiểm tra nếu là các module con của Kho (TonKho, PhieuKho) thì gộp chung hiển thị thành "Kho Vận"
-        let displayMod = mod;
-        if (mod === "TonKho" || mod === "PhieuKho") {
-            displayMod = "KhoVan";
-        }
-
-        // Tránh lập lại icon "Kho Vận" nếu User có cả quyền TonKho và PhieuKho
-        if (displayMod === "KhoVan" && hasKho) return;
-
-        const conf = moduleConfigs[displayMod] || { group: "khac", icon: "box", color: "bg-blue", desc: "Chức năng hệ thống." };
-        
-        const card = document.createElement('div');
-        card.className = "module-card";
-        card.innerHTML = `
-            <div class="icon-box ${conf.color}"><i data-lucide="${conf.icon}"></i></div>
-            <div class="module-info">
-                <h3>${displayMod === "KhoVan" ? "Kho Vận" : displayMod}</h3>
-                <p>${conf.desc}</p>
-            </div>
-        `;
-        
-        card.onclick = () => {
-            const perms = btoa(JSON.stringify(userAuth.permissions));
-            window.location.href = `${displayMod}.html?user=${encodeURIComponent(userAuth.name)}&auth=${perms}`;
-        };
-
-        if(conf.group === "kho") {
-            gridKho.appendChild(card);
-            hasKho = true;
-        } else {
-            gridKinhDoanh.appendChild(card);
-            hasKinhDoanh = true;
-        }
-    });
-
-    if(hasKho) document.getElementById('group-kho-van').classList.remove('hidden');
-    if(hasKinhDoanh) document.getElementById('group-kinh-doanh').classList.remove('hidden');
+    // Khởi tạo icons
     lucide.createIcons();
-}
+
+    // Hàm cập nhật ngày tháng
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('current-date').innerText = new Date().toLocaleDateString('vi-VN', options);
+
+    function logout() {
+        if(confirm("Bạn có chắc chắn muốn đăng xuất không?")) {
+            localStorage.removeItem('loggedUser');
+            location.reload();
+        }
+    }
+
+    // Logic kiểm tra đăng nhập có thể thêm tại đây
 </script>
 </body>
 </html>
