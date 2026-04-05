@@ -13,7 +13,7 @@
         .main-card { background: white; border-radius: 12px; border: none; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin: 0 2rem; min-height: 400px; }
         .table thead { background: #f8fafc; border-bottom: 2px solid #edf2f7; }
         .table th { font-weight: 600; color: #475569; text-transform: uppercase; font-size: 12px; padding: 15px; }
-        .table td { vertical-align: middle; padding: 12px 15px; border-bottom: 1px solid #f1f5f9; }
+        .table td { vertical-align: middle; padding: 8px 15px; border-bottom: 1px solid #f1f5f9; }
         .icon-box { width: 32px; height: 32px; border-radius: 8px; background: #e7f0ff; color: #0d6efd; display: flex; align-items: center; justify-content: center; }
         .badge-active { background: #e6fffa; color: #059669; border: 1px solid #b2f5ea; padding: 4px 10px; border-radius: 20px; font-size: 11px; }
         .badge-inactive { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; padding: 4px 10px; border-radius: 20px; font-size: 11px; }
@@ -36,7 +36,7 @@
             <i data-lucide="arrow-left" style="width:16px"></i> Quay lại
         </button>
     </div>
-    <button class="btn btn-primary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalAdd">
+    <button class="btn btn-primary d-flex align-items-center gap-2" onclick="showAddModal()">
         <i data-lucide="plus-circle" style="width:20px"></i> Thêm mới
     </button>
 </div>
@@ -74,7 +74,7 @@
             <div class="modal-header">
                 <div class="d-flex align-items-center gap-3">
                     <div class="icon-box"><i data-lucide="list"></i></div>
-                    <h5 class="modal-title fw-bold">Thông tin mặt hàng</h5>
+                    <h5 class="modal-title fw-bold" id="modalTitle">Thông tin mặt hàng</h5>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -127,15 +127,15 @@
 <script>
     const SB_URL = "https://rlttyoforullfzlyeawa.supabase.co";
     const SB_KEY = "sb_publishable_Poa0upMxgh2GM0JkS17Bkg_XhchIrrb"; 
+    let editingId = null; // Biến lưu ID khi sửa
 
     window.onload = async function() {
         lucide.createIcons();
-        await loadCategories(); // Load nhóm hàng
-        await loadUnits();      // Load ĐƠN VỊ TÍNH TỪ SUPABASE
-        await loadProducts();   // Load danh sách sản phẩm
+        await loadCategories(); 
+        await loadUnits();      
+        await loadProducts();   
     };
 
-    // 1. Lấy danh sách Nhóm hàng
     async function loadCategories() {
         try {
             const res = await fetch(`${SB_URL}/rest/v1/categories?select=*&order=name.asc`, {
@@ -148,7 +148,6 @@
         } catch (e) { console.error("Lỗi load nhóm:", e); }
     }
 
-    // 2. Lấy danh sách ĐƠN VỊ TÍNH (Kết nối với Quanlynhom.html)
     async function loadUnits() {
         try {
             const res = await fetch(`${SB_URL}/rest/v1/units?select=*&order=name.asc`, {
@@ -156,7 +155,6 @@
             });
             const data = await res.json();
             const select = document.getElementById('unit');
-            
             if (data.length === 0) {
                 select.innerHTML = '<option value="">(Chưa có ĐVT)</option>';
             } else {
@@ -169,7 +167,6 @@
         }
     }
 
-    // 3. Lấy danh sách Sản phẩm
     async function loadProducts() {
         try {
             const response = await fetch(`${SB_URL}/rest/v1/products?select=*&order=created_at.desc`, {
@@ -205,12 +202,47 @@
                 <td><span class="${item.is_active !== false ? 'badge-active' : 'badge-inactive'}">${item.is_active !== false ? 'Hoạt động' : 'Tạm dừng'}</span></td>
                 <td class="text-muted small">${new Date(item.created_at).toLocaleDateString('vi-VN')}</td>
                 <td class="text-end">
-                    <button class="btn btn-link p-0 me-2 text-primary" onclick="alert('Tính năng đang cập nhật')"><i data-lucide="edit-3" style="width:18px"></i></button>
+                    <button class="btn btn-link p-0 me-2 text-primary" onclick="editItem('${item.id}')"><i data-lucide="edit-3" style="width:18px"></i></button>
                     <button class="btn btn-link p-0 text-danger" onclick="deleteItem('${item.id}')"><i data-lucide="trash-2" style="width:18px"></i></button>
                 </td>
             </tr>
         `).join('');
         lucide.createIcons();
+    }
+
+    // Hàm hiển thị modal thêm mới (reset form)
+    function showAddModal() {
+        editingId = null;
+        document.getElementById('productForm').reset();
+        document.getElementById('modalTitle').innerText = "Thông tin mặt hàng";
+        document.getElementById('btnSave').innerText = "Lưu mặt hàng";
+        new bootstrap.Modal(document.getElementById('modalAdd')).show();
+    }
+
+    // Hàm lấy dữ liệu đổ vào modal để sửa
+    async function editItem(id) {
+        editingId = id;
+        try {
+            const res = await fetch(`${SB_URL}/rest/v1/products?id=eq.${id}`, {
+                headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
+            });
+            const data = await res.json();
+            const item = data[0];
+
+            if (item) {
+                document.getElementById('sku').value = item.sku;
+                document.getElementById('name').value = item.name;
+                document.getElementById('category').value = item.category_name || "";
+                document.getElementById('sort_order').value = item.sort_order || 0;
+                document.getElementById('unit').value = item.unit || "";
+                document.getElementById('statusSwitch').checked = item.is_active !== false;
+
+                document.getElementById('modalTitle').innerText = "Chỉnh sửa mặt hàng";
+                document.getElementById('btnSave').innerText = "Cập nhật thay đổi";
+                
+                new bootstrap.Modal(document.getElementById('modalAdd')).show();
+            }
+        } catch (e) { alert("Lỗi tải thông tin!"); }
     }
 
     async function saveData() {
@@ -220,29 +252,42 @@
             name: document.getElementById('name').value.trim(),
             category_name: document.getElementById('category').value,
             sort_order: parseInt(document.getElementById('sort_order').value) || 0,
-            unit: document.getElementById('unit').value, // LẤY GIÁ TRỊ TỪ SELECT
+            unit: document.getElementById('unit').value,
             is_active: document.getElementById('statusSwitch').checked
         };
 
         if (!product.sku || !product.name) return alert("Vui lòng nhập Mã và Tên hàng!");
 
         btn.disabled = true;
-        btn.innerText = "Đang lưu...";
+        btn.innerText = "Đang xử lý...";
 
         try {
-            const response = await fetch(`${SB_URL}/rest/v1/products`, {
-                method: "POST",
-                headers: { 
-                    "apikey": SB_KEY, 
-                    "Authorization": `Bearer ${SB_KEY}`,
-                    "Content-Type": "application/json",
-                    "Prefer": "return=minimal"
-                },
-                body: JSON.stringify(product)
-            });
+            let response;
+            if (editingId) {
+                // UPDATE (PATCH)
+                response = await fetch(`${SB_URL}/rest/v1/products?id=eq.${editingId}`, {
+                    method: "PATCH",
+                    headers: { 
+                        "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(product)
+                });
+            } else {
+                // INSERT (POST)
+                response = await fetch(`${SB_URL}/rest/v1/products`, {
+                    method: "POST",
+                    headers: { 
+                        "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`,
+                        "Content-Type": "application/json",
+                        "Prefer": "return=minimal"
+                    },
+                    body: JSON.stringify(product)
+                });
+            }
 
             if (response.ok) {
-                alert("Lưu thành công!");
+                alert(editingId ? "Cập nhật thành công!" : "Lưu thành công!");
                 location.reload();
             } else {
                 const err = await response.json();
