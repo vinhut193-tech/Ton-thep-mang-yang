@@ -164,7 +164,7 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2niInya7Wz9kmDLDdL4Ip6eLkw33Rwdafv6c-fQoiTO2XV6X2ShxnakVPHz31XkMJzA/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2niInya7Wz9kmDLDdL4Ip6eLkw33Rwdafv6c-fQoiTO2XV6X2ShxnakVPHz31XkMJzA/exec";
 
     // 1. Cập nhật thời gian thực
     function updateTime() {
@@ -172,11 +172,28 @@
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('current-date').innerText = now.toLocaleDateString('vi-VN', options);
         document.getElementById('real-time-clock').innerText = now.toLocaleTimeString('vi-VN');
+        
+        // Kiểm tra chuyển ngày mỗi giây để tự động đăng xuất nếu đang mở máy qua đêm
+        checkNewDay();
     }
     setInterval(updateTime, 1000);
     updateTime();
 
-    // 2. Xử lý Đăng nhập
+    // 2. Logic kiểm tra qua ngày mới (0h00)
+    function checkNewDay() {
+        const userData = JSON.parse(localStorage.getItem('loggedUser'));
+        if (userData && userData.loginDate) {
+            const today = new Date().toLocaleDateString('vi-VN');
+            // Nếu ngày lưu trong máy khác với ngày hiện tại (đã qua 0h00)
+            if (userData.loginDate !== today) {
+                localStorage.removeItem('loggedUser');
+                alert("Phiên đăng nhập đã hết hạn (qua 0h00). Vui lòng đăng nhập lại!");
+                location.reload();
+            }
+        }
+    }
+
+    // 3. Xử lý Đăng nhập
     async function doLogin() {
         const u = document.getElementById('username').value;
         const p = document.getElementById('password').value;
@@ -193,6 +210,8 @@
             const data = await response.json();
 
             if(data.status === "success") {
+                // Thêm ngày đăng nhập vào object trước khi lưu
+                data.loginDate = new Date().toLocaleDateString('vi-VN');
                 localStorage.setItem('loggedUser', JSON.stringify(data));
                 checkAuth();
             } else {
@@ -205,8 +224,11 @@
         }
     }
 
-    // 3. Kiểm tra quyền và Hiển thị UI
+    // 4. Kiểm tra quyền và Hiển thị UI
     function checkAuth() {
+        // Kiểm tra qua ngày trước khi hiển thị UI
+        checkNewDay();
+        
         const user = JSON.parse(localStorage.getItem('loggedUser'));
         if(user) {
             document.getElementById('login-page').classList.add('hidden');
@@ -218,7 +240,7 @@
         }
     }
 
-    // 4. Tìm kiếm Module nhanh
+    // 5. Tìm kiếm Module nhanh
     function searchModule(input) {
         let filter = input.value.toLowerCase();
         let cards = document.querySelectorAll('.module-card');
@@ -236,6 +258,7 @@
     }
 
     window.onload = checkAuth;
+</script>
 </script>
 </body>
 </html>
