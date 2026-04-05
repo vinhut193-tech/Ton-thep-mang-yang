@@ -82,16 +82,15 @@
                 <form id="productForm" class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Mã hàng <span class="text-danger">*</span></label>
-                        <input type="text" id="sku" class="form-control" required>
+                        <input type="text" id="sku" class="form-control" placeholder="VD: Sắt-001" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Tên hàng <span class="text-danger">*</span></label>
-                        <input type="text" id="name" class="form-control" required>
+                        <input type="text" id="name" class="form-control" placeholder="VD: Thép tấm 5 ly" required>
                     </div>
                     <div class="col-md-12">
                         <label class="form-label fw-bold">Nhóm hàng</label>
-                        <select id="category" class="form-select">
-                            </select>
+                        <select id="category" class="form-select"></select>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Thứ tự</label>
@@ -99,7 +98,9 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Đơn vị tính</label>
-                        <input type="text" id="unit" class="form-control">
+                        <select id="unit" class="form-select">
+                            <option value="">— Đang tải đơn vị —</option>
+                        </select>
                     </div>
                     <div class="col-md-12 mt-4">
                         <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 bg-light">
@@ -127,35 +128,51 @@
     const SB_URL = "https://rlttyoforullfzlyeawa.supabase.co";
     const SB_KEY = "sb_publishable_Poa0upMxgh2GM0JkS17Bkg_XhchIrrb"; 
 
-    // 1. Khởi tạo khi trang tải xong
     window.onload = async function() {
         lucide.createIcons();
-        await loadCategories(); // Load nhóm hàng trước
-        await loadProducts();   // Sau đó load danh sách sản phẩm
+        await loadCategories(); // Load nhóm hàng
+        await loadUnits();      // Load ĐƠN VỊ TÍNH TỪ SUPABASE
+        await loadProducts();   // Load danh sách sản phẩm
     };
 
-    // 2. Lấy danh sách Nhóm hàng từ bảng 'categories'
+    // 1. Lấy danh sách Nhóm hàng
     async function loadCategories() {
         try {
-            const response = await fetch(`${SB_URL}/rest/v1/categories?select=*&order=sort_order.asc`, {
+            const res = await fetch(`${SB_URL}/rest/v1/categories?select=*&order=name.asc`, {
                 headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
             });
-            const categories = await response.json();
-            const selectCategory = document.getElementById('category');
-            
-            selectCategory.innerHTML = '<option value="">— Không (Cấp gốc) —</option>';
-            categories.forEach(cat => {
-                selectCategory.innerHTML += `<option value="${cat.name}">${cat.name}</option>`;
+            const data = await res.json();
+            const select = document.getElementById('category');
+            select.innerHTML = '<option value="">— Chọn nhóm hàng —</option>' + 
+                               data.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('');
+        } catch (e) { console.error("Lỗi load nhóm:", e); }
+    }
+
+    // 2. Lấy danh sách ĐƠN VỊ TÍNH (Kết nối với Quanlynhom.html)
+    async function loadUnits() {
+        try {
+            const res = await fetch(`${SB_URL}/rest/v1/units?select=*&order=name.asc`, {
+                headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
             });
-        } catch (error) {
-            console.error("Lỗi load danh mục:", error);
+            const data = await res.json();
+            const select = document.getElementById('unit');
+            
+            if (data.length === 0) {
+                select.innerHTML = '<option value="">(Chưa có ĐVT)</option>';
+            } else {
+                select.innerHTML = '<option value="">— Chọn đơn vị —</option>' + 
+                                   data.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
+            }
+        } catch (e) {
+            console.error("Lỗi load đơn vị:", e);
+            document.getElementById('unit').innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
         }
     }
 
     // 3. Lấy danh sách Sản phẩm
     async function loadProducts() {
         try {
-            const response = await fetch(`${SB_URL}/rest/v1/products?select=*&order=sort_order.asc`, {
+            const response = await fetch(`${SB_URL}/rest/v1/products?select=*&order=created_at.desc`, {
                 headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
             });
             const data = await response.json();
@@ -166,7 +183,6 @@
         }
     }
 
-    // 4. Hiển thị bảng
     function renderTable(data) {
         const tbody = document.getElementById('table-body');
         if (data.length === 0) {
@@ -185,11 +201,11 @@
                     </div>
                 </td>
                 <td><span class="badge bg-light text-dark border">${item.sku}</span></td>
-                <td class="text-muted">${item.category || '—'}</td>
-                <td><span class="${item.is_active ? 'badge-active' : 'badge-inactive'}">${item.is_active ? 'Hoạt động' : 'Tạm dừng'}</span></td>
-                <td class="text-muted small">${new Date(item.updated_at || Date.now()).toLocaleDateString('vi-VN')}</td>
+                <td class="text-muted">${item.category_name || '—'}</td>
+                <td><span class="${item.is_active !== false ? 'badge-active' : 'badge-inactive'}">${item.is_active !== false ? 'Hoạt động' : 'Tạm dừng'}</span></td>
+                <td class="text-muted small">${new Date(item.created_at).toLocaleDateString('vi-VN')}</td>
                 <td class="text-end">
-                    <button class="btn btn-link p-0 me-2 text-primary" onclick="editItem('${item.id}')"><i data-lucide="edit-3" style="width:18px"></i></button>
+                    <button class="btn btn-link p-0 me-2 text-primary" onclick="alert('Tính năng đang cập nhật')"><i data-lucide="edit-3" style="width:18px"></i></button>
                     <button class="btn btn-link p-0 text-danger" onclick="deleteItem('${item.id}')"><i data-lucide="trash-2" style="width:18px"></i></button>
                 </td>
             </tr>
@@ -197,15 +213,14 @@
         lucide.createIcons();
     }
 
-    // 5. Lưu dữ liệu
     async function saveData() {
         const btn = document.getElementById('btnSave');
         const product = {
-            sku: document.getElementById('sku').value,
-            name: document.getElementById('name').value,
-            category: document.getElementById('category').value,
-            sort_order: parseInt(document.getElementById('sort_order').value),
-            unit: document.getElementById('unit').value,
+            sku: document.getElementById('sku').value.trim(),
+            name: document.getElementById('name').value.trim(),
+            category_name: document.getElementById('category').value,
+            sort_order: parseInt(document.getElementById('sort_order').value) || 0,
+            unit: document.getElementById('unit').value, // LẤY GIÁ TRỊ TỪ SELECT
             is_active: document.getElementById('statusSwitch').checked
         };
 
@@ -230,7 +245,8 @@
                 alert("Lưu thành công!");
                 location.reload();
             } else {
-                alert("Lỗi: " + response.statusText);
+                const err = await response.json();
+                alert("Lỗi: " + err.message);
             }
         } catch (error) {
             alert("Lỗi kết nối!");
@@ -240,7 +256,17 @@
         }
     }
 
-    // 6. Tìm kiếm
+    async function deleteItem(id) {
+        if(!confirm("Xóa mặt hàng này?")) return;
+        try {
+            await fetch(`${SB_URL}/rest/v1/products?id=eq.${id}`, {
+                method: "DELETE",
+                headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
+            });
+            location.reload();
+        } catch (e) { alert("Lỗi xóa!"); }
+    }
+
     function filterTable() {
         const val = document.getElementById('searchInput').value.toLowerCase();
         const rows = document.querySelectorAll('#table-body tr');
