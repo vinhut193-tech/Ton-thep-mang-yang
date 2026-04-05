@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cơ cấu tổ chức - Tree View</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .tree-container { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        /* Style cho cây thư mục */
+        .tree, .tree ul { margin: 0; padding: 0; list-style: none; }
+        .tree ul { margin-left: 1em; position: relative; }
+        .tree ul ul { margin-left: 2em; }
+        
+        .tree li { margin: 0; padding: 0 1em; line-height: 2.4em; color: #369; font-weight: 600; position: relative; }
+        
+        /* Đường kẻ dọc */
+        .tree ul:before {
+            content: ""; display: block; width: 0; position: absolute; top: 0; bottom: 0; left: 0;
+            border-left: 1px solid #ccc;
+        }
+        
+        .tree li:before {
+            content: ""; display: block; width: 15px; height: 0; border-top: 1px solid #ccc;
+            margin-top: -1px; position: absolute; top: 1.2em; left: 0;
+        }
+        
+        .tree li:last-child:before { background: white; height: auto; top: 1.2em; bottom: 0; }
+
+        /* Style cho item phòng ban */
+        .dept-name { color: #2563eb; font-size: 1.1rem; cursor: pointer; }
+        .dept-name i { margin-right: 8px; color: #f59e0b; }
+
+        /* Style cho item nhân viên */
+        .user-item {
+            background: #f9fafb; border: 1px solid #edf2f7; border-radius: 8px;
+            padding: 8px 15px; margin-bottom: 5px; display: inline-flex; align-items: center;
+            font-weight: 400; color: #4a5568; min-width: 400px;
+        }
+        .user-info { display: flex; gap: 20px; width: 100%; }
+        .u-name { font-weight: 600; color: #1a202c; width: 150px; }
+        .u-phone { color: #718096; width: 120px; }
+        .u-pos { font-style: italic; color: #3182ce; }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="tree-container">
+        <h4 class="mb-4 text-dark fw-bold"><i class="fas fa-network-wired me-2"></i>SƠ ĐỒ CƠ CẤU TỔ CHỨC</h4>
+        <hr>
+        <div id="treeView" class="tree">
+            <p class="text-muted">Đang khởi tạo sơ đồ...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const supabaseUrl = 'https://rlttyoforullfzlyeawa.supabase.co';
+    const supabaseKey = 'sb_publishable_Poa0upMxgh2GM0JkS17Bkg_XhchIrrb'.trim(); 
+    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    document.addEventListener('DOMContentLoaded', loadTreeStructure);
+
+    async function loadTreeStructure() {
+        const treeView = document.getElementById('treeView');
+        
+        try {
+            // 1. Lấy phòng ban
+            const { data: depts, error: errD } = await _supabase.from('departments').select('*');
+            // 2. Lấy nhân viên và chức vụ (join bảng positions nếu có)
+            const { data: users, error: errU } = await _supabase
+                .from('users')
+                .select('fullname, phone, department_id, positions(name)');
+
+            if (errD || errU) throw (errD || errU);
+
+            treeView.innerHTML = '';
+            const rootUl = document.createElement('ul');
+
+            depts.forEach(dept => {
+                const deptLi = document.createElement('li');
+                deptLi.innerHTML = `<span class="dept-name"><i class="fas fa-folder-open"></i>${dept.name}</span>`;
+                
+                const userUl = document.createElement('ul');
+                
+                // Lọc nhân viên thuộc phòng này
+                const deptUsers = users.filter(u => u.department_id == dept.id);
+                
+                if (deptUsers.length > 0) {
+                    deptUsers.forEach(user => {
+                        const userLi = document.createElement('li');
+                        userLi.innerHTML = `
+                            <div class="user-item">
+                                <div class="user-info">
+                                    <span class="u-name"><i class="fas fa-user me-2 text-secondary"></i>${user.fullname}</span>
+                                    <span class="u-phone"><i class="fas fa-phone-alt me-2 small"></i>${user.phone || 'N/A'}</span>
+                                    <span class="u-pos">[${user.positions?.name || 'Nhân viên'}]</span>
+                                </div>
+                            </div>
+                        `;
+                        userUl.appendChild(userLi);
+                    });
+                } else {
+                    const emptyLi = document.createElement('li');
+                    emptyLi.innerHTML = `<span class="text-muted small ms-2 font-weight-normal"><i>(Chưa có nhân sự)</i></span>`;
+                    userUl.appendChild(emptyLi);
+                }
+
+                deptLi.appendChild(userUl);
+                rootUl.appendChild(deptLi);
+            });
+
+            treeView.appendChild(rootUl);
+
+        } catch (error) {
+            treeView.innerHTML = `<div class="text-danger">Lỗi hệ thống: ${error.message}</div>`;
+        }
+    }
+</script>
+
+</body>
+</html>
