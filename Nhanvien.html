@@ -3,229 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý nhân viên - Hệ thống</title>
+    <title>Quản lý nhân viên - Vua Nệm</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .main-card { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .table thead { background-color: #f1f4f9; color: #4b5563; font-weight: 600; }
-        .badge-active { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-        .btn-primary { background-color: #2563eb; border: none; }
-        .btn-primary:hover { background-color: #1d4ed8; }
-        .form-label { font-weight: 600; color: #374151; margin-top: 0.5rem; }
+        :root { --primary-color: #2563eb; --bg-gray: #f1f5f9; }
+        body { background-color: var(--bg-gray); font-family: 'Inter', 'Segoe UI', sans-serif; }
+        
+        /* Table & Card Style */
+        .main-card { background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.02); border: none; margin-top: 20px; }
+        .table thead th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; padding: 15px 20px; border-bottom: 1px solid #e2e8f0; }
+        .table tbody td { padding: 16px 20px; color: #334155; border-bottom: 1px solid #f1f5f9; }
+
+        /* Action Buttons - Phong cách chuyên nghiệp */
+        .btn-action { 
+            width: 35px; height: 35px; 
+            display: inline-flex; align-items: center; justify-content: center; 
+            border-radius: 10px; border: none; 
+            transition: all 0.3s ease; margin: 0 3px;
+        }
+        .btn-view { background-color: #e0e7ff; color: #4338ca; }
+        .btn-view:hover { background-color: #4338ca; color: white; transform: translateY(-2px); }
+        
+        .btn-edit { background-color: #fef3c7; color: #d97706; }
+        .btn-edit:hover { background-color: #d97706; color: white; transform: translateY(-2px); }
+        
+        .btn-delete { background-color: #fee2e2; color: #dc2626; }
+        .btn-delete:hover { background-color: #dc2626; color: white; transform: translateY(-2px); }
+
+        /* Tabs & Form */
+        .nav-tabs-custom .nav-link { border: none; color: #64748b; font-weight: 500; padding: 15px 25px; position: relative; }
+        .nav-tabs-custom .nav-link.active { color: var(--primary-color); background: none; }
+        .nav-tabs-custom .nav-link.active::after { content: ""; position: absolute; bottom: 0; left: 20%; width: 60%; height: 3px; background: var(--primary-color); border-radius: 10px; }
+        .section-title { font-size: 0.9rem; font-weight: 700; color: #1e293b; margin: 25px 0 15px; padding-left: 10px; border-left: 4px solid var(--primary-color); }
+        .form-label { font-weight: 600; color: #475569; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="text-primary fw-bold"><i class="fas fa-users-cog me-2"></i>Quản lý tài khoản người dùng</h4>
-        <button class="btn btn-primary px-4" data-bs-toggle="modal" data-bs-target="#addUserModal">
-            <i class="fas fa-user-plus me-1"></i> Thêm thành viên
+<div class="container-fluid py-4 px-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+            <h3 class="fw-bold text-dark mb-0">Nhân sự Khu vực Bình Định</h3>
+            <p class="text-muted small">Quản lý danh sách và hồ sơ nhân viên Vua Nệm</p>
+        </div>
+        <button class="btn btn-primary shadow-sm rounded-3 px-4 py-2" data-bs-toggle="modal" data-bs-target="#addUserModal" onclick="resetForm()">
+            <i class="fas fa-plus me-2"></i>Thêm nhân viên mới
         </button>
     </div>
 
-    <div class="main-card p-3 mb-3">
-        <div class="row g-2">
-            <div class="col-md-4">
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                    <input type="text" class="form-control border-start-0" placeholder="Tìm tên, username hoặc vai trò...">
-                </div>
-            </div>
-            <div class="col-md-2">
-                <select class="form-select"><option>Tất cả vai trò</option></select>
-            </div>
-            <div class="col-md-2">
-                <select class="form-select"><option>Trạng thái</option></select>
-            </div>
+    <div class="main-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Nhân viên & Mã số</th>
+                        <th>Chức vụ & Phòng ban</th>
+                        <th>Liên hệ</th>
+                        <th>Trạng thái</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary spinner-border-sm me-2"></div> Đang tải dữ liệu...</td></tr>
+                </tbody>
+            </table>
         </div>
-    </div>
-
-    <div class="main-card p-0 overflow-hidden">
-        <table class="table table-hover mb-0 align-middle">
-            <thead>
-                <tr>
-                    <th class="ps-4 py-3">HỌ TÊN & USERNAME</th>
-                    <th>VAI TRÒ (CẤP BẬC)</th>
-                    <th>PHÒNG BAN</th>
-                    <th>TRẠNG THÁI</th>
-                    <th class="text-end pe-4">THAO TÁC</th>
-                </tr>
-            </thead>
-            <tbody id="userTableBody">
-                <tr><td colspan="5" class="text-center py-4 text-muted small">Đang tải dữ liệu...</td></tr>
-            </tbody>
-        </table>
     </div>
 </div>
 
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title fw-bold">THÊM NHÂN VIÊN MỚI</h5>
+            <div class="modal-header border-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold text-primary" id="modalTitle">THÊM NHÂN VIÊN MỚI</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            
+            <div class="modal-body px-4">
+                <ul class="nav nav-tabs nav-tabs-custom mb-4" role="tablist">
+                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab_personal"><i class="fas fa-id-card me-2"></i>Cá nhân</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab_work"><i class="fas fa-briefcase me-2"></i>Công việc</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab_finance"><i class="fas fa-map-marked-alt me-2"></i>Địa chỉ & Tài chính</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab_insurance"><i class="fas fa-user-shield me-2"></i>Bảo hiểm</a></li>
+                </ul>
+
                 <form id="addUserForm">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Họ và Tên *</label>
-                            <input type="text" id="add_fullname" class="form-control" placeholder="Nhập tên nhân viên" required>
+                    <div class="tab-content pt-2">
+                        <div class="tab-pane fade show active" id="tab_personal">
+                            <div class="row g-3">
+                                <div class="col-md-4"><label class="form-label">Họ và tên *</label><input type="text" id="fullname" class="form-control" placeholder="Nguyễn Văn A" required></div>
+                                <div class="col-md-4"><label class="form-label">Mã nhân viên *</label><input type="text" id="emp_code" class="form-control" placeholder="NV001" required></div>
+                                <div class="col-md-4"><label class="form-label">Giới tính</label>
+                                    <select id="gender" class="form-select">
+                                        <option value="Nam">Nam</option><option value="Nữ">Nữ</option><option value="Khác">Khác</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4"><label class="form-label">Ngày sinh</label><input type="date" id="dob" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Số CCCD</label><input type="text" id="cccd" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Ngày cấp</label><input type="date" id="cccd_date" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Nơi cấp</label><input type="text" id="cccd_place" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Quốc tịch</label><input type="text" id="nationality" class="form-control" value="Việt Nam"></div>
+                                <div class="col-md-4"><label class="form-label">Dân tộc</label><input type="text" id="nation" class="form-control" value="Kinh"></div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Ngày tháng năm sinh</label>
-                            <input type="date" id="add_dob" class="form-control">
+
+                        <div class="tab-pane fade" id="tab_work">
+                            <div class="row g-3">
+                                <div class="col-md-4"><label class="form-label">Tài khoản (Username) *</label><input type="text" id="username" class="form-control" required></div>
+                                <div class="col-md-4"><label class="form-label">Mật khẩu *</label><input type="password" id="password" class="form-control" required></div>
+                                <div class="col-md-4"><label class="form-label">Phòng ban</label><select id="department_id" class="form-select"></select></div>
+                                <div class="col-md-4"><label class="form-label">Chức vụ</label><select id="position_id" class="form-select"></select></div>
+                                <div class="col-md-4"><label class="form-label">Ngày vào làm</label><input type="date" id="join_date" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Số điện thoại *</label><input type="text" id="phone" class="form-control" placeholder="090..."></div>
+                                <div class="col-md-6"><label class="form-label">Email công việc</label><input type="email" id="email_work" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label">Email cá nhân</label><input type="email" id="email_personal" class="form-control"></div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Username (Tài khoản) *</label>
-                            <input type="text" id="add_username" class="form-control" placeholder="Ví dụ: nhut.bd01" required>
+
+                        <div class="tab-pane fade" id="tab_finance">
+                            <div class="section-title">THÔNG TIN ĐỊA CHỈ</div>
+                            <div class="row g-3">
+                                <div class="col-md-4"><label class="form-label">Tỉnh/Thành</label><input type="text" id="province" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Quận/Huyện</label><input type="text" id="district" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Phường/Xã</label><input type="text" id="ward" class="form-control"></div>
+                                <div class="col-md-12"><label class="form-label">Địa chỉ chi tiết</label><input type="text" id="address_detail" class="form-control"></div>
+                            </div>
+                            <div class="section-title">NGÂN HÀNG & THUẾ</div>
+                            <div class="row g-3">
+                                <div class="col-md-4"><label class="form-label">Số tài khoản</label><input type="text" id="bank_acc" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">Ngân hàng</label><input type="text" id="bank_name" class="form-control"></div>
+                                <div class="col-md-4"><label class="form-label">MST cá nhân</label><input type="text" id="tax_code" class="form-control"></div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Mật khẩu *</label>
-                            <input type="password" id="add_password" class="form-control" required>
-                        </div>
-                        <hr class="my-4 opacity-25">
-                        <div class="col-md-4">
-                            <label class="form-label">Phòng ban</label>
-                            <select id="sel_dept" class="form-select">
-                                <option value="">Chọn phòng...</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Cấp bậc</label>
-                            <select id="sel_pos" class="form-select">
-                                <option value="">Chọn cấp bậc...</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Chức danh cụ thể</label>
-                            <input type="text" id="add_job" class="form-control" placeholder="VD: Kế toán kho">
+
+                        <div class="tab-pane fade" id="tab_insurance">
+                            <div class="section-title">BẢO HIỂM</div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6"><label class="form-label">Số BHXH</label><input type="text" id="social_insurance" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label">Số BHYT</label><input type="text" id="health_insurance" class="form-control"></div>
+                            </div>
+                            <div class="section-title">LIÊN HỆ KHẨN CẤP</div>
+                            <div class="row g-3">
+                                <div class="col-md-6"><label class="form-label">Người liên hệ</label><input type="text" id="emergency_contact" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label">SĐT khẩn cấp</label><input type="text" id="emergency_phone" class="form-control"></div>
+                            </div>
                         </div>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" id="btnSaveUser" class="btn btn-primary px-4" onclick="saveUser()">Lưu nhân viên</button>
+            
+            <div class="modal-footer border-0 pb-4 px-4">
+                <button type="button" class="btn btn-light rounded-3 px-4" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" id="btnSave" class="btn btn-primary rounded-3 px-5" onclick="saveUser()">Lưu thông tin</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- LƯU Ý CHO NHỰT ---
-    // Nhựt vào Supabase -> Project Settings -> API
-    // Copy dòng 'Project URL' dán vào supabaseUrl
-    // Copy dòng 'anon / public' (Dòng rất dài) dán vào supabaseKey
-    const supabaseUrl = 'https://rlttyoforullfzlyeawa.supabase.co'; 
-    const supabaseKey = 'sb_publishable_Poa0upMxgh2GM0JkS17Bkg_XhchIrrb'; 
-    
+    const supabaseUrl = 'https://rlttyoforullfzlyeawa.supabase.co';
+    const supabaseKey = 'sb_publishable_Poa0upMxgh2GM0JkS17Bkg_XhchIrrb'.trim(); 
     const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        await loadFilters();
-        await loadUsers();
+    let editingUserId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadFilters();
+        loadUsers();
     });
 
     async function loadFilters() {
-        try {
-            const { data: depts, error: errD } = await _supabase.from('departments').select('*');
-            if (errD) throw errD;
-            const deptSelect = document.getElementById('sel_dept');
-            if(depts) depts.forEach(d => deptSelect.innerHTML += `<option value="${d.id}">${d.name}</option>`);
-
-            const { data: poss, error: errP } = await _supabase.from('positions').select('*');
-            if (errP) throw errP;
-            const posSelect = document.getElementById('sel_pos');
-            if(poss) poss.forEach(p => posSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`);
-        } catch (err) {
-            console.error("Lỗi kết nối Supabase:", err.message);
-        }
+        const { data: depts } = await _supabase.from('departments').select('*');
+        const { data: poss } = await _supabase.from('positions').select('*');
+        document.getElementById('department_id').innerHTML = '<option value="">Chọn phòng ban...</option>' + depts?.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+        document.getElementById('position_id').innerHTML = '<option value="">Chọn chức vụ...</option>' + poss?.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
     }
 
     async function loadUsers() {
-        const { data: users, error } = await _supabase
-            .from('users')
-            .select('*, departments(name), positions(name)')
-            .order('created_at', { ascending: false });
-        
+        const { data: users, error } = await _supabase.from('users').select('*, departments(name), positions(name)').order('created_at', { ascending: false });
         const tbody = document.getElementById('userTableBody');
-        tbody.innerHTML = '';
+        if (error) { tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Lỗi API: ${error.message}</td></tr>`; return; }
 
-        if (error) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger">Lỗi tải dữ liệu: ${error.message}</td></tr>`;
-            return;
+        tbody.innerHTML = users.map(u => `
+            <tr>
+                <td class="ps-4">
+                    <div class="fw-bold text-dark">${u.fullname}</div>
+                    <div class="text-muted x-small" style="font-size: 0.75rem;">${u.emp_code || 'Chưa có mã'}</div>
+                </td>
+                <td>
+                    <div class="small fw-semibold text-primary">${u.positions?.name || '-'}</div>
+                    <div class="text-muted x-small" style="font-size: 0.7rem;">${u.departments?.name || '-'}</div>
+                </td>
+                <td><div class="small"><i class="fas fa-phone-alt me-1 text-muted"></i> ${u.phone || '-'}</div></td>
+                <td><span class="badge bg-success-subtle text-success border border-success-subtle px-3">Đang làm việc</span></td>
+                <td class="text-center">
+                    <button class="btn-action btn-view" onclick="viewUser('${u.id}')" title="Xem hồ sơ"><i class="fas fa-eye"></i></button>
+                    <button class="btn-action btn-edit" onclick="editUser('${u.id}')" title="Chỉnh sửa"><i class="fas fa-pen"></i></button>
+                    <button class="btn-action btn-delete" onclick="deleteUser('${u.id}')" title="Xóa"><i class="fas fa-trash-alt"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function resetForm() {
+        editingUserId = null;
+        const form = document.getElementById('addUserForm');
+        form.reset();
+        form.querySelectorAll('input, select').forEach(i => i.disabled = false);
+        document.getElementById('modalTitle').innerText = "THÊM NHÂN VIÊN MỚI";
+        document.getElementById('btnSave').style.display = 'block';
+    }
+
+    async function editUser(id) {
+        editingUserId = id;
+        const { data: user } = await _supabase.from('users').select('*').eq('id', id).single();
+        if (user) {
+            const form = document.getElementById('addUserForm');
+            form.querySelectorAll('input, select').forEach(input => {
+                if (input.id && user[input.id] !== undefined) input.value = user[input.id];
+            });
+            document.getElementById('modalTitle').innerText = "CHỈNH SỬA NHÂN VIÊN";
+            document.getElementById('btnSave').style.display = 'block';
+            new bootstrap.Modal(document.getElementById('addUserModal')).show();
         }
+    }
 
-        if (!users || users.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted small">Chưa có nhân viên nào.</td></tr>';
-            return;
-        }
-
-        users.forEach(u => {
-            tbody.innerHTML += `
-                <tr>
-                    <td class="ps-4">
-                        <div class="fw-bold">${u.fullname}</div>
-                        <div class="text-muted small">${u.username}</div>
-                    </td>
-                    <td><span class="badge bg-light text-dark border px-2 py-1">${u.positions?.name || 'Chưa set'}</span></td>
-                    <td>${u.departments?.name || '-'}</td>
-                    <td><span class="badge badge-active px-2 py-1 rounded-pill">Hoạt động</span></td>
-                    <td class="text-end pe-4">
-                        <button class="btn btn-sm btn-outline-secondary me-1"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${u.id}')"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `;
-        });
+    async function viewUser(id) {
+        await editUser(id);
+        document.getElementById('modalTitle').innerText = "CHI TIẾT HỒ SƠ NHÂN VIÊN";
+        document.getElementById('btnSave').style.display = 'none';
+        document.getElementById('addUserForm').querySelectorAll('input, select').forEach(i => i.disabled = true);
     }
 
     async function saveUser() {
-        const btn = document.getElementById('btnSaveUser');
-        const payload = {
-            fullname: document.getElementById('add_fullname').value,
-            username: document.getElementById('add_username').value,
-            password: document.getElementById('add_password').value,
-            dob: document.getElementById('add_dob').value || null,
-            department_id: document.getElementById('sel_dept').value || null,
-            position_id: document.getElementById('sel_pos').value || null,
-            can_view: true 
-        };
+        const btn = document.getElementById('btnSave');
+        const form = document.getElementById('addUserForm');
+        const inputs = form.querySelectorAll('input, select');
+        let payload = {};
+        inputs.forEach(input => { if(input.id) payload[input.id] = input.value || null; });
 
-        if (!payload.fullname || !payload.username || !payload.password) {
-            alert("Vui lòng điền các trường bắt buộc (*)");
-            return;
-        }
+        if (!payload.fullname || !payload.username) { alert("Nhựt ơi, vui lòng nhập ít nhất Họ tên và Username nhé!"); return; }
 
         btn.disabled = true;
-        btn.innerText = "Đang xử lý...";
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang xử lý...';
+        
+        const result = editingUserId 
+            ? await _supabase.from('users').update(payload).eq('id', editingUserId)
+            : await _supabase.from('users').insert([payload]);
 
-        const { error } = await _supabase.from('users').insert([payload]);
-
-        if (error) {
-            alert("Lỗi: " + error.message);
+        if (result.error) {
+            alert("Lỗi: " + result.error.message);
             btn.disabled = false;
-            btn.innerText = "Lưu nhân viên";
+            btn.innerText = "Lưu thông tin";
         } else {
-            alert("Thành công: Nhân viên mới đã được lưu!");
-            location.reload(); 
+            bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+            loadUsers();
         }
     }
 
     async function deleteUser(id) {
-        if(confirm("Bạn có chắc muốn xóa nhân viên này?")) {
-            const { error } = await _supabase.from('users').delete().eq('id', id);
-            if(error) alert("Lỗi khi xóa");
-            else loadUsers();
+        if(confirm("Bạn có chắc chắn muốn xóa nhân viên này khỏi hệ thống?")) {
+            await _supabase.from('users').delete().eq('id', id);
+            loadUsers();
         }
     }
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
