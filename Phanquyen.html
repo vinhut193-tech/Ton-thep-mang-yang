@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Phân quyền hệ thống - Dữ liệu thực tế</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .permission-table th { background-color: #f8f9fa; text-align: center; border-bottom: 2px solid #dee2e6; }
+        .permission-table td { text-align: center; vertical-align: middle; }
+        .dept-header { background-color: #f1f5f9; font-weight: bold; text-align: left !important; color: #334155; }
+        .btn-save { background-color: #0d6efd; color: white; font-weight: 500; }
+        .form-check-input { cursor: pointer; width: 1.25em; height: 1.25em; border: 1px solid #cbd5e1; }
+        .role-name { font-weight: 500; color: #475569; }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4><i class="bi bi-shield-check text-primary"></i> Quản lý Phân quyền <span class="badge bg-primary-subtle text-primary ms-2">Theo Cấp Bậc</span></h4>
+        <button id="btnSave" class="btn btn-save shadow-sm px-4">
+            <i class="bi bi-cloud-arrow-up-fill"></i> Lưu tất cả thay đổi
+        </button>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered permission-table mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 35%; text-align: left;">Phòng ban / Chức vụ</th>
+                        <th>Xem</th>
+                        <th>Thêm</th>
+                        <th>Sửa</th>
+                        <th>Xóa</th>
+                        <th>Duyệt</th>
+                    </tr>
+                </thead>
+                <tbody id="permissionBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Cấu hình Supabase
+    const SUPABASE_URL = 'https://rlttyoforullfzlyeawa.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_Poa0upMxgh2GM0JkS17Bkg_XhchIrrb';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function loadDynamicPermissions() {
+        const tbody = document.getElementById('permissionBody');
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5"><div class="spinner-border text-primary"></div><br>Đang đồng bộ dữ liệu...</td></tr>';
+
+        try {
+            // Lấy danh sách phòng ban
+            const { data: departments, error: deptError } = await supabaseClient
+                .from('departments')
+                .select('*')
+                .order('name');
+
+            /** * QUAN TRỌNG: Lấy dữ liệu user kèm theo thông tin từ bảng positions
+             * Giả định bảng chức vụ của bạn tên là 'positions' và có cột 'name'
+             * Nếu tên bảng khác, bạn hãy đổi 'positions(name)' thành 'TenBangCuaBan(name)'
+             */
+            const { data: usersData, error: userError } = await supabaseClient
+                .from('users')
+                .select(`
+                    position_id, 
+                    department_id, 
+                    can_view, 
+                    can_add, 
+                    can_edit, 
+                    can_delete, 
+                    can_approve,
+                    positions:position_id ( name )
+                `);
+
+            if (deptError || userError) throw (deptError || userError);
+
+            let html = '';
+
+            departments.forEach(dept => {
+                html += `<tr><td colspan="6" class="dept-header"><i class="bi bi-building-fill-gear me-2"></i> ${dept.name}</td></tr>`;
+
+                const rolesInDept = [];
+                const filtered = usersData.filter(u => u.department_id === dept.id);
+                
+                filtered.forEach(item => {
+                    if (!rolesInDept.find(r => r.position_id === item.position_id)) {
+                        rolesInDept.push(item);
+                    }
+                });
+
+                if (rolesInDept.length === 0) {
+                    html += `<tr><td colspan="6" class="text-muted small ps-5 py-3">Chưa có nhân sự thuộc phòng này</td></tr>`;
+                }
+
+                rolesInDept.forEach(role => {
+                    // Lấy tên chức vụ từ kết quả join, nếu không có thì mới hiện mã ID
+                    const displayName = role.positions ? role.positions.name : role.position_id;
+
+                    html += `
+                    <tr data-role-id="${role.position_id}">
+                        <td class="text-start ps-5 role-name">${displayName}</td>
+                        <td><input type="checkbox" class="form-check-input" data-type="can_view" ${role.can_view ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="form-check-input" data-type="can_add" ${role.can_add ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="form-check-input" data-type="can_edit" ${role.can_edit ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="form-check-input" data-type="can_delete" ${role.can_delete ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="form-check-input" data-type="can_approve" ${role.can_approve ? 'checked' : ''}></td>
+                    </tr>`;
+                });
+            });
+
+            tbody.innerHTML = html;
+
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-danger p-3">Lỗi: ${err.message}</td></tr>`;
+        }
+    }
+
+    // Xử lý lưu dữ liệu
+    document.getElementById('btnSave').addEventListener('click', async () => {
+        const btn = document.getElementById('btnSave');
+        const rows = document.querySelectorAll('#permissionBody tr[data-role-id]');
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang cập nhật...';
+
+        try {
+            for (let row of rows) {
+                const roleId = row.getAttribute('data-role-id');
+                const updates = {
+                    can_view: row.querySelector('[data-type="can_view"]').checked,
+                    can_add: row.querySelector('[data-type="can_add"]').checked,
+                    can_edit: row.querySelector('[data-type="can_edit"]').checked,
+                    can_delete: row.querySelector('[data-type="can_delete"]').checked,
+                    can_approve: row.querySelector('[data-type="can_approve"]').checked
+                };
+
+                const { error } = await supabaseClient
+                    .from('users')
+                    .update(updates)
+                    .eq('position_id', roleId);
+                
+                if (error) throw error;
+            }
+            alert("Thành công: Đã cập nhật quyền cho toàn bộ cấp bậc!");
+        } catch (err) {
+            alert("Lỗi hệ thống: " + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Lưu tất cả thay đổi';
+        }
+    });
+
+    loadDynamicPermissions();
+</script>
+</body>
+</html>
