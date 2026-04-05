@@ -12,16 +12,12 @@
         .page-header { background: white; padding: 1rem 2rem; border-bottom: 1px solid #e2e8f0; }
         .badge-duyet { background: #dcfce7; color: #15803d; }
         .badge-cho { background: #fef9c3; color: #a16207; }
-        .badge-huy { background: #fee2e2; color: #b91c1c; }
         .main-card { background: white; border-radius: 12px; margin: 1.5rem 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .nav-tabs-custom { border-bottom: 1px solid #f1f5f9; padding: 0 1rem; }
         .nav-tabs-custom .nav-link { border: none; padding: 1rem; color: #64748b; font-weight: 500; cursor: pointer; }
         .nav-tabs-custom .nav-link.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
         .table th { background: #f8fafc; color: #475569; font-size: 12px; text-transform: uppercase; padding: 12px 15px; }
-        .modal-header { border-bottom: 1px solid #f1f5f9; background: #f8fafc; }
         .form-label { font-weight: 600; color: #334155; margin-bottom: 4px; }
-        .form-control, .form-select { border-color: #e2e8f0; font-size: 14px; }
-        .form-control:focus { border-color: var(--primary); box-shadow: none; }
     </style>
 </head>
 <body>
@@ -31,7 +27,7 @@
         <button class="btn btn-sm btn-outline-secondary" onclick="history.back()"><i data-lucide="arrow-left" style="width:16px"></i></button>
         <h5 class="mb-0 fw-bold">Phiếu kho</h5>
     </div>
-    <button class="btn btn-primary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalThemPhieu" onclick="updateModalTitle()">
+    <button class="btn btn-primary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalThemPhieu" onclick="prepareNewVoucher()">
         <i data-lucide="plus" style="width:18px"></i> Thêm mới
     </button>
 </div>
@@ -43,22 +39,13 @@
         <li class="nav-item"><a class="nav-link" data-type="CHUYEN"><i data-lucide="refresh-cw" class="me-1" style="width:14px"></i> Chuyển kho</a></li>
     </ul>
 
-    <div class="p-3 d-flex gap-2">
-        <input type="text" id="searchVoucher" class="form-control form-control-sm" style="max-width: 300px;" placeholder="Tìm kiếm mã phiếu, nội dung...">
-        <select class="form-select form-select-sm" style="max-width: 150px;">
-            <option>Tất cả trạng thái</option>
-            <option>Đã duyệt</option>
-            <option>Chờ duyệt</option>
-        </select>
-    </div>
-
     <table class="table mb-0">
         <thead>
             <tr>
-                <th width="50"><input type="checkbox" class="form-check-input"></th>
+                <th width="50">#</th>
                 <th>Số phiếu</th>
                 <th>Ngày</th>
-                <th>Kho đến</th>
+                <th>Kho</th>
                 <th>Mô tả</th>
                 <th>Trạng thái</th>
                 <th>Thao tác</th>
@@ -73,10 +60,8 @@
 <div class="modal fade" id="modalThemPhieu" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header">
-                <h6 class="modal-title fw-bold d-flex align-items-center gap-2 text-uppercase" id="modalTitleText">
-                    <i data-lucide="file-text" class="text-primary"></i> PHIẾU NHẬP KHO
-                </h6>
+            <div class="modal-header bg-light">
+                <h6 class="modal-title fw-bold text-uppercase" id="modalTitleText">PHIẾU NHẬP KHO</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
@@ -91,10 +76,10 @@
                             <input type="date" id="v_date" class="form-control" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small">Kho đến <span class="text-danger">*</span></label>
+                            <label class="form-label small">Kho <span class="text-danger">*</span></label>
                             <select id="v_warehouse" class="form-select" required>
-                                <option value="MANGYANG01">Kho Mang Yang 1</option>
-                                <option value="BDI01">Kho Bình Định</option>
+                                <option value="Kho Mang Yang 1">Kho Mang Yang 1</option>
+                                <option value="Kho Bình Định">Kho Bình Định</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -103,39 +88,33 @@
                         </div>
                         <div class="col-md-12">
                             <label class="form-label small">Mô tả</label>
-                            <textarea id="v_note" class="form-control" rows="2" placeholder="Nhập mô tả"></textarea>
+                            <textarea id="v_note" class="form-control" rows="2"></textarea>
                         </div>
                     </div>
 
-                    <div class="border rounded p-3 bg-white">
+                    <div class="border rounded p-3">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="mb-0 fw-bold small text-primary d-flex align-items-center gap-2">
-                                <i data-lucide="package-2" style="width:16px"></i> CHI TIẾT HÀNG HÓA <span class="badge bg-primary rounded-pill" id="rowCountBadge">0</span>
-                            </h6>
-                            <button type="button" class="btn btn-primary btn-sm px-3" id="add-row">
-                                <i data-lucide="plus" class="me-1" style="width:14px"></i> Thêm dòng
-                            </button>
+                            <h6 class="mb-0 fw-bold small text-primary">CHI TIẾT HÀNG HÓA <span class="badge bg-primary rounded-pill" id="rowCountBadge">0</span></h6>
+                            <button type="button" class="btn btn-primary btn-sm" id="add-row"><i data-lucide="plus" style="width:14px"></i> Thêm hàng</button>
                         </div>
-                        <div class="table-responsive">
-                            <table class="table table-sm border-top" id="product-table">
-                                <thead>
-                                    <tr class="bg-light">
-                                        <th width="40" class="text-center">#</th>
-                                        <th>Hàng hóa</th>
-                                        <th width="120">Số lượng</th>
-                                        <th width="100">Đơn vị</th>
-                                        <th width="50"></th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
+                        <table class="table table-sm border-top" id="product-table">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th width="40">#</th>
+                                    <th>Hàng hóa</th>
+                                    <th width="120">Số lượng</th>
+                                    <th width="100">Đơn vị</th>
+                                    <th width="50"></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary px-4" onclick="saveVoucher()">Tạo phiếu <i data-lucide="arrow-right" class="ms-1" style="width:14px"></i></button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" id="btnSave" class="btn btn-primary px-4" onclick="saveVoucher()">Tạo phiếu</button>
             </div>
         </div>
     </div>
@@ -148,39 +127,31 @@
     let currentType = "NHAP";
     let allProducts = [];
 
-    // Hàm cập nhật tiêu đề Modal dựa trên Tab đang chọn
-    function updateModalTitle() {
-        const titleMap = {
-            'NHAP': 'PHIẾU NHẬP KHO',
-            'XUAT': 'PHIẾU XUẤT KHO',
-            'CHUYEN': 'PHIẾU CHUYỂN KHO'
-        };
-        const titleText = titleMap[currentType] || 'PHIẾU KHO';
-        document.getElementById('modalTitleText').innerHTML = `<i data-lucide="file-text" class="text-primary"></i> ${titleText}`;
-        document.getElementById('v_type_display').value = titleText;
-        lucide.createIcons();
+    function prepareNewVoucher() {
+        const titleMap = { 'NHAP': 'PHIẾU NHẬP KHO', 'XUAT': 'PHIẾU XUẤT KHO', 'CHUYEN': 'PHIẾU CHUYỂN KHO' };
+        document.getElementById('modalTitleText').innerText = titleMap[currentType];
+        document.getElementById('v_type_display').value = titleMap[currentType];
+        document.querySelector('#product-table tbody').innerHTML = '';
+        document.getElementById('rowCountBadge').innerText = '0';
+        document.getElementById('v_date').valueAsDate = new Date();
     }
 
     async function loadVouchers() {
         try {
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/vouchers?type=eq.${currentType}&select=*`, {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/vouchers?type=eq.${currentType}&select=*&order=created_at.desc`, {
                 headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
             });
             const data = await res.json();
             const tbody = document.getElementById('voucherTableBody');
-            tbody.innerHTML = data.length === 0 ? `<tr><td colspan="7" class="text-center py-4 text-muted">Chưa có phiếu nào.</td></tr>` : 
-            data.map(v => `
+            tbody.innerHTML = data.map((v, i) => `
                 <tr>
-                    <td><input type="checkbox" class="form-check-input"></td>
+                    <td>${i+1}</td>
                     <td class="fw-bold text-primary">${v.voucher_code}</td>
                     <td>${v.date}</td>
                     <td>${v.warehouse_id}</td>
                     <td>${v.note || ''}</td>
                     <td><span class="badge ${v.status === 'Đã duyệt' ? 'badge-duyet' : 'badge-cho'}">${v.status}</span></td>
-                    <td>
-                        <button class="btn btn-sm text-primary"><i data-lucide="edit-3" style="width:16px"></i></button>
-                        <button class="btn btn-sm text-danger" onclick="deleteVoucher('${v.id}')"><i data-lucide="trash-2" style="width:16px"></i></button>
-                    </td>
+                    <td><button class="btn btn-sm text-danger" onclick="deleteVoucher('${v.id}')"><i data-lucide="trash-2" style="width:16px"></i></button></td>
                 </tr>
             `).join('');
             lucide.createIcons();
@@ -198,7 +169,13 @@
         const tbody = document.querySelector('#product-table tbody');
         const rowCount = tbody.rows.length + 1;
         const options = allProducts.map(p => `<option value="${p.sku}" data-unit="${p.unit}">${p.name}</option>`).join('');
-        const row = `<tr><td class="text-center align-middle">${rowCount}</td><td><select class="form-select form-select-sm item-sku" onchange="updateUnit(this)"><option value="">Chọn hàng hóa</option>${options}</select></td><td><input type="number" class="form-control form-control-sm item-qty" value="1"></td><td><input type="text" class="form-control form-control-sm bg-light item-unit" readonly placeholder="-"></td><td class="text-center"><button class="btn btn-sm text-danger remove-row"><i data-lucide="trash-2" style="width:14px"></i></button></td></tr>`;
+        const row = `<tr>
+            <td class="text-center align-middle">${rowCount}</td>
+            <td><select class="form-select form-select-sm item-sku" onchange="updateUnit(this)"><option value="">Chọn hàng</option>${options}</select></td>
+            <td><input type="number" class="form-control form-control-sm item-qty" value="1"></td>
+            <td><input type="text" class="form-control form-control-sm bg-light item-unit" readonly></td>
+            <td class="text-center"><button type="button" class="btn btn-sm text-danger remove-row"><i data-lucide="trash-2" style="width:14px"></i></button></td>
+        </tr>`;
         tbody.insertAdjacentHTML('beforeend', row);
         lucide.createIcons();
         document.getElementById('rowCountBadge').innerText = tbody.rows.length;
@@ -210,28 +187,59 @@
     }
 
     async function saveVoucher() {
-        const vData = {
-            voucher_code: document.getElementById('v_code').value,
-            date: document.getElementById('v_date').value,
-            warehouse_id: document.getElementById('v_warehouse').value,
-            type: currentType,
-            note: document.getElementById('v_note').value,
-            status: "Chờ duyệt"
-        };
-        if (!vData.voucher_code || !vData.date) return alert("Vui lòng nhập đủ Số phiếu và Ngày!");
+        const btn = document.getElementById('btnSave');
+        const v_code = document.getElementById('v_code').value;
+        const v_date = document.getElementById('v_date').value;
+        const v_warehouse = document.getElementById('v_warehouse').value;
+        const v_note = document.getElementById('v_note').value;
+
+        const rows = document.querySelectorAll('#product-table tbody tr');
+        const details = [];
+        rows.forEach(row => {
+            const sku = row.querySelector('.item-sku').value;
+            const qty = row.querySelector('.item-qty').value;
+            const unit = row.querySelector('.item-unit').value;
+            if (sku && qty > 0) details.push({ product_sku: sku, quantity: parseFloat(qty), unit: unit });
+        });
+
+        if (!v_code || details.length === 0) return alert("Vui lòng nhập đủ thông tin và hàng hóa!");
+
         try {
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/vouchers`, {
+            btn.disabled = true;
+            btn.innerText = "Đang lưu...";
+
+            // 1. Lưu Phiếu Chính (vouchers)
+            const resV = await fetch(`${SUPABASE_URL}/rest/v1/vouchers`, {
+                method: 'POST',
+                headers: { 
+                    "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, 
+                    "Content-Type": "application/json", "Prefer": "return=representation" 
+                },
+                body: JSON.stringify({ voucher_code: v_code, date: v_date, warehouse_id: v_warehouse, type: currentType, note: v_note })
+            });
+
+            const createdVoucher = await resV.json();
+            const voucherId = createdVoucher[0].id;
+
+            // 2. Lưu Chi Tiết (chi_tiet_phieu)
+            const detailsPayload = details.map(d => ({ ...d, voucher_id: voucherId }));
+            await fetch(`${SUPABASE_URL}/rest/v1/chi_tiet_phieu`, {
                 method: 'POST',
                 headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
-                body: JSON.stringify(vData)
+                body: JSON.stringify(detailsPayload)
             });
-            if(res.ok) { alert("Tạo phiếu thành công!"); location.reload(); }
-        } catch (e) { alert("Lỗi lưu dữ liệu!"); }
+
+            alert("Tạo phiếu thành công!");
+            location.reload();
+        } catch (e) {
+            alert("Lỗi: " + e.message);
+        } finally {
+            btn.disabled = false;
+        }
     }
 
     document.querySelectorAll('#typeTabs .nav-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
+        link.addEventListener('click', function() {
             document.querySelectorAll('#typeTabs .nav-link').forEach(l => l.classList.remove('active'));
             this.classList.add('active');
             currentType = this.getAttribute('data-type');
@@ -239,18 +247,14 @@
         });
     });
 
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', (e) => {
         if (e.target.closest('.remove-row')) {
             e.target.closest('tr').remove();
             document.getElementById('rowCountBadge').innerText = document.querySelector('#product-table tbody').rows.length;
         }
     });
 
-    window.onload = () => {
-        loadVouchers();
-        loadProducts();
-        document.getElementById('v_date').valueAsDate = new Date();
-    };
+    window.onload = () => { loadVouchers(); loadProducts(); };
 </script>
 </body>
 </html>
